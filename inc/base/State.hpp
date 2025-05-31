@@ -1,10 +1,15 @@
 #pragma once
 
 #include "common.h"
+#include "utility.h"
 
 namespace mines
 {
-    enum class GameStates { READY, PLAYING, ENDED };
+    // enum class GameStates { READY, PLAYING, ENDED };
+
+    /**
+     * Game Model Finite State Machine
+    **/
 
     class Game; // Model
     class State
@@ -18,6 +23,8 @@ namespace mines
 
         virtual void Reveal(Index, Index) {}
         virtual void Flag(Index, Index) {}
+        virtual void NewGame(DifficultyConfig);
+
         Game& Context() { return context; }
 
     protected:
@@ -44,6 +51,7 @@ namespace mines
 
         virtual void Reveal(Index, Index) override;
         virtual void Flag(Index, Index) override;
+        // virtual void NewGame(DifficultyConfig) override;
     };
 
     struct GameOverState final : public State
@@ -52,6 +60,7 @@ namespace mines
 
         void Enter() override;
         void Exit() override;
+        // virtual void NewGame(DifficultyConfig) override;
     };
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common.h"
+#include "utility.h"
 
 namespace mines
 {
@@ -30,6 +31,24 @@ public:
 
 private:
     Index row, col;
+};
+
+class NewGameCommand final : public ICommand
+{
+public:
+    NewGameCommand() = default;
+    void Execute(Game&) override;
+};
+
+
+class NewCustomGameCommand final : public ICommand
+{
+public:
+    NewCustomGameCommand(const DifficultyConfig&);
+    void Execute(Game&) override;
+
+private:
+    DifficultyConfig diff;
 };
 
 }

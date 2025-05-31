@@ -9,6 +9,7 @@
 #include "Game.hpp"
 #include "Tile.hpp"
 #include "TextureManager.hpp"
+#include "Smiley.hpp"
 
 namespace mines
 {
@@ -37,16 +38,19 @@ private:
     
     Controller &context;
     TextureManager texman;
-    
+
+    Smiley smiley; // The smiley face
     sf::Font font;
     sf::Text message{font};
     sf::Text data{font};
     
-    void HandleCellClicked(const sf::Event::MouseButtonReleased&);
+    void HandleClicked(const sf::Event::MouseButtonPressed&);
+    void HandleClickReleased(const sf::Event::MouseButtonReleased&);
     void DrawCell(Index r, Index c);
     void RefreshTexture(Index r, Index c, const Cell&);
     Tile* TileAt(float x, float y);
     std::optional<UPair<Index>> CalculateCellCoord(float x, float y) const;
+    // void PublishCommand(std::unique_ptr<ICommand>); // wrapper to do additional work depending on the command
     
 #ifndef NDEBUG
     sf::Text debugInfo{font};

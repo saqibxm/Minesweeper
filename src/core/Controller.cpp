@@ -18,6 +18,7 @@ Controller::Controller(Game *p_model, bool graphical)
 
 Controller::Controller(Game &gameModel) : model(gameModel)
 {
+    // commands.reserve(100);
 }
 
 Controller::~Controller()

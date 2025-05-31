@@ -23,3 +23,18 @@ void FlagCommand::Execute(Game &model)
 {
     model.Flag(row, col);
 }
+
+void NewGameCommand::Execute(Game &model)
+{
+    model.NewGame(model.CurrentConfig());
+}
+
+NewCustomGameCommand::NewCustomGameCommand(const DifficultyConfig &dc)
+    : diff(dc)
+{
+}
+
+void NewCustomGameCommand::Execute(Game &model)
+{
+    model.NewGame(diff);
+}

@@ -48,6 +48,7 @@ set(
     src/ui/Graphics/GraphicalView.cpp
     src/ui/Graphics/TextureManager.cpp
     src/ui/Graphics/Tile.cpp
+    src/ui/Graphics/Smiley.cpp
 )
 
 

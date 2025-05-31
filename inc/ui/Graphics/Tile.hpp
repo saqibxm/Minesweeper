@@ -10,6 +10,7 @@ namespace mines
 {
     class Tile : public sf::Drawable
     {
+        // friend class Graphics;
     public:
         constexpr static unsigned width = 20, height = 20; // n pixels each
 

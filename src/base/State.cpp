@@ -3,12 +3,18 @@
 
 using namespace mines;
 
+void State::NewGame(DifficultyConfig dc)
+{
+    context.Initialize(dc.rows, dc.cols, dc.mines);
+}
+
 ReadyState::ReadyState(Game &ctx) : State(ctx)
 {
 }
 
 void ReadyState::Enter()
 {
+    context.state = context.READY;
     context.Notify();
 }
 
@@ -38,6 +44,7 @@ void PlayingState::Enter()
 {
     // context.Notify();
     // notify the views that we are in playing state so they update
+    context.state = context.PLAYING;
 }
 
 void PlayingState::Exit()
@@ -73,6 +80,7 @@ GameOverState::GameOverState(Game &ctx) : State(ctx)
 
 void GameOverState::Enter()
 {
+    context.state = context.ENDED;
 }
 
 void GameOverState::Exit()

@@ -2,11 +2,30 @@
 
 using namespace mines;
 
-Game::Game(std::size_t w, std::size_t h, std::size_t m) : gameState(new ReadyState(*this))
+Game::Game(std::size_t rows, std::size_t cols, std::size_t mines)
+    : gameState(new ReadyState(*this)), config(Difficulty::CUSTOM, rows, cols, mines)
 {
-    Initialize(w, h, m);
+    Initialize(rows, cols, mines);
     // Notify();
     state = PLAYING;
+}
+
+void Game::NewGame(const DifficultyConfig &dc)
+{
+    config = dc;
+    gameState->NewGame(dc);
+    TransitionTo<ReadyState>();
+    Notify();
+}
+
+void Game::NewGame(std::size_t rows, std::size_t cols, std::size_t mines)
+{
+    config.level = Difficulty::CUSTOM;
+    config.rows = rows;
+    config.cols = cols;
+    config.mines = mines;
+
+    NewGame(config);
 }
 
 void Game::Reveal(Index r, Index c)

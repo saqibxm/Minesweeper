@@ -8,7 +8,7 @@
 
 namespace mines
 {
-    class DifficultyConfig {};
+    struct DifficultyConfig;
     class Controller;
 
     interface IView : public IObserver

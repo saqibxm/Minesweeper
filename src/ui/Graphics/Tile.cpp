@@ -60,6 +60,8 @@ sf::Vector2f Tile::RetrieveSize() const {
     return {DisplayConfig::TileWidth, DisplayConfig::TileHeight};
 }
 sf::Rect<float> Tile::BoundingPos() const {
+    return tile.getGlobalBounds();
+
     auto [x, y] = tile.getPosition();
     auto [w, h] = RetrieveSize();
     return sf::Rect<float>{{x, y}, {x + w, y + h}};

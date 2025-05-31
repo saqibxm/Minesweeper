@@ -31,6 +31,9 @@ void Field::Initialize(Index n_rows, Index n_cols, unsigned n_mines)
 
     if constexpr(debug)
         UpdateProximity(); // if debugging update proximity of all cells beforehand
+
+    cleared = 0;
+    flagged = 0;
 }
 
 void Field::PlaceMines()

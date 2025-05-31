@@ -9,7 +9,7 @@
 using namespace mines;
 
 Graphics::Graphics(Controller &ctrl)
-    : context(ctrl)
+    : context(ctrl), smiley(texman)
 {
     using namespace DisplayConfig;
 
@@ -32,10 +32,15 @@ Graphics::Graphics(Controller &ctrl)
         tiles.push_back(std::move(vec));
     }
     */
+
+    smiley.OnClick([this] { context.HandleCommand(std::make_unique<NewGameCommand>()); });
     
     window.setFramerateLimit(30);
     
     std::ignore = font.openFromFile("assets/Monocraft.ttf"); // TODO: remove hardcodes
+
+    smiley.UpdateSize(64, 64);
+    smiley.UpdateTexture(texman.FetchPtr("smileface"));
 
     message.setFillColor(sf::Color::White);
     message.setPosition(sf::Vector2f(10.0f, 10.0f));
@@ -61,6 +66,10 @@ void Graphics::Reset(const BoardSnapshot &snap)
 {
     using namespace DisplayConfig;
     window.create(DisplayConfig::ComputeVideoMode({snap.rows, snap.cols}), DisplayConfig::Title, sf::Style::Close);
+    auto [windowWidth, windowHeight] = window.getSize();
+    auto [smileyWidth, smileyHeight] = smiley.RetrieveSize();
+
+    smiley.UpdatePosition((windowWidth / 2) - smileyWidth, (HeaderHeight / 2) - smileyHeight);
 
     tiles.clear();
     tiles.reserve(snap.rows);
@@ -119,6 +128,7 @@ void Graphics::Display()
 
     window.draw(message);
     window.draw(data);
+    window.draw(smiley);
 
     
 #ifndef NDEBUG
@@ -161,7 +171,11 @@ void Graphics::Display()
         }
         else if constexpr (std::is_same_v<Type, sf::Event::MouseButtonReleased>)
         {
-            HandleCellClicked(event);
+            HandleClickReleased(event);
+        }
+        else if constexpr (std::is_same_v<Type, sf::Event::MouseButtonPressed>)
+        {
+            HandleClicked(event);
         }
     });
     
@@ -204,12 +218,15 @@ void Graphics::CountersReceived(unsigned revealCount, unsigned flagCount)
 
 void Graphics::Ended()
 {
+    smiley.Happy();
 }
 
 void Graphics::Lost(Index r, Index c) // the coordinates of the cell that exploded
 {
     tiles[r][c].UpdateTexture(texman.FetchPtr("blast"));
     message.setString("Game Lost!");
+
+    smiley.Kill();
 }
 
 void Graphics::DrawCell(Index row, Index col)
@@ -262,19 +279,33 @@ void Graphics::RefreshTexture(Index row, Index col, const Cell& cell)
     tile.UpdateTexture(texman.FetchPtr(texture));
 }
 
-void Graphics::HandleCellClicked(const sf::Event::MouseButtonReleased &mouse)
+void Graphics::HandleClickReleased(const sf::Event::MouseButtonReleased &mouse)
 {
     const auto [x, y] = mouse.position;
     auto coords = CalculateCellCoord(x, y);
 
-    if(!coords) return;
+    smiley.Release();
+    if(!coords && smiley.BoundingPos().contains(sf::Vector2f(mouse.position)))
+    {
+        // context.HandleCommand(std::make_unique<NewGameCommand>());
+    }
+    else
+    {
+        auto [row, col] = *coords;
+    
+        if(mouse.button == sf::Mouse::Button::Left)
+            context.HandleCommand(std::make_unique<RevealCommand>(row, col));
+        else if(mouse.button == sf::Mouse::Button::Right)
+            context.HandleCommand(std::make_unique<FlagCommand>(row, col));
+    }
+}
 
-    auto [row, col] = *coords;
-
-    if(mouse.button == sf::Mouse::Button::Left)
-        context.HandleCommand(std::make_unique<RevealCommand>(row, col));
-    else if(mouse.button == sf::Mouse::Button::Right)
-        context.HandleCommand(std::make_unique<FlagCommand>(row, col));
+void Graphics::HandleClicked(const sf::Event::MouseButtonPressed &mouse)
+{
+    if(!smiley.BoundingPos().contains(sf::Vector2f(mouse.position)))
+        smiley.Click(false);
+    else
+        smiley.Click(true);
 }
 
 Tile* Graphics::TileAt(float x, float y)

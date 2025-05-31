@@ -4,6 +4,7 @@
 #include <list>
 #include <type_traits>
 
+#include "utility.h"
 #include "State.hpp"
 #include "Subject.hpp"
 #include "Field.hpp"
@@ -11,8 +12,6 @@
 namespace mines
 {
     // Model of the MVC
-class DifficultyConfig;
-
 struct BoardSnapshot
 {
     struct DebugCellInfo {
@@ -20,8 +19,8 @@ struct BoardSnapshot
         bool is_flagged;
         short neighbour_mines;
     };
-    std::size_t rows = 0, cols = 0;
-    std::size_t mines = 0;
+    std::size_t rows, cols;
+    std::size_t mines;
     Field::Grid cells;
 };
 
@@ -37,6 +36,8 @@ public:
     Game(const DifficultyConfig&);
 
     void NewGame(const DifficultyConfig&);
+    void NewGame(std::size_t w, std::size_t h, std::size_t m);
+
     void Reveal(Index r, Index c);
     void Flag(Index r, Index c);
     
@@ -54,9 +55,13 @@ public:
 
     void TransitionTo(std::unique_ptr<State>);
 
+    EState CurrentState() const { return state; }
+    DifficultyConfig CurrentConfig() const { return config; }
+
 private:
     EState state;
     std::unique_ptr<State> gameState;
+    DifficultyConfig config;
     
     bool CheckWin() const;
     

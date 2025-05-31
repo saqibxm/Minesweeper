@@ -284,7 +284,7 @@ void Graphics::HandleClickReleased(const sf::Event::MouseButtonReleased &mouse)
     const auto [x, y] = mouse.position;
     auto coords = CalculateCellCoord(x, y);
 
-    smiley.Release();
+    smiley.Released(mouse.position);
     if(!coords && smiley.BoundingPos().contains(sf::Vector2f(mouse.position)))
     {
         // context.HandleCommand(std::make_unique<NewGameCommand>());
@@ -303,9 +303,9 @@ void Graphics::HandleClickReleased(const sf::Event::MouseButtonReleased &mouse)
 void Graphics::HandleClicked(const sf::Event::MouseButtonPressed &mouse)
 {
     if(!smiley.BoundingPos().contains(sf::Vector2f(mouse.position)))
-        smiley.Click(false);
+        smiley.Clicked(mouse.position);
     else
-        smiley.Click(true);
+        smiley.Clicked(mouse.position);
 }
 
 Tile* Graphics::TileAt(float x, float y)

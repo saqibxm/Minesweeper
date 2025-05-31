@@ -19,7 +19,7 @@ public:
     
     void OnClick(ClickCallback);
     Smiley& Clicked(sf::Vector2i pos);
-    Smiley& Released(sf::Vector2i pos);
+    Smiley& Released([[maybe_unused]] sf::Vector2i pos);
     Smiley& React(); // react when cells are clicked
     Smiley& Happy();
     Smiley& Kill(); // X(

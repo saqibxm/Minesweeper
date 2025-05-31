@@ -26,7 +26,7 @@ struct BoardSnapshot
 
 class Game : public ISubject, public Field // Field is not a dynamic class
 {
-    enum EState { READY, PLAYING, ENDED };
+    enum EState { READY, PLAYING, ENDED, INDETERMINATE };
     friend class ReadyState;
     friend class PlayingState;
     friend class GameOverState;
@@ -34,6 +34,7 @@ class Game : public ISubject, public Field // Field is not a dynamic class
 public:
     Game(std::size_t w, std::size_t h, std::size_t m);
     Game(const DifficultyConfig&);
+    ~Game();
 
     void NewGame(const DifficultyConfig&);
     void NewGame(std::size_t w, std::size_t h, std::size_t m);
@@ -48,7 +49,8 @@ public:
     template <typename T, typename = std::enable_if_t<std::is_base_of_v<State, T>>>
     void TransitionTo()
     {
-        gameState->Exit();
+        if (gameState)
+            gameState->Exit();
         gameState.reset(new T(*this));
         gameState->Enter();
     }

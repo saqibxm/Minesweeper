@@ -15,25 +15,29 @@ ReadyState::ReadyState(Game &ctx) : State(ctx)
 void ReadyState::Enter()
 {
     context.state = context.READY;
-    context.Notify();
+    // context.UpdateProximity();
+    // context.Notify();
 }
 
 void ReadyState::Exit()
 {
+    context.state = context.INDETERMINATE;
 }
 
 void ReadyState::Reveal(Index r, Index c)
 {
-    auto playstate = std::make_unique<PlayingState>(context);
-    playstate->Reveal(r, c);
-    context.TransitionTo(std::move(playstate));
+    // context.TransitionTo<PlayingState>();
+    // context.Reveal(r, c);
 }
 
 void ReadyState::Flag(Index r, Index c)
 {
-    auto playstate = std::make_unique<PlayingState>(context);
-    playstate->Flag(r, c);
-    context.TransitionTo(std::move(playstate));
+    // PURE GARBAGE
+    /*
+    auto s = std::make_unique<PlayingState>(context);
+    s->Flag(r, c);
+    context.TransitionTo(std::move(s));
+    */
 }
 
 PlayingState::PlayingState(Game &ctx) : State(ctx)
@@ -49,6 +53,7 @@ void PlayingState::Enter()
 
 void PlayingState::Exit()
 {
+    context.state = context.INDETERMINATE;
 }
 
 void PlayingState::Reveal(Index row, Index col)
@@ -85,4 +90,5 @@ void GameOverState::Enter()
 
 void GameOverState::Exit()
 {
+    context.state = context.INDETERMINATE;
 }

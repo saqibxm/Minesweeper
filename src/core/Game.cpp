@@ -3,11 +3,15 @@
 using namespace mines;
 
 Game::Game(std::size_t rows, std::size_t cols, std::size_t mines)
-    : gameState(new ReadyState(*this)), config(Difficulty::CUSTOM, rows, cols, mines)
+    : gameState(nullptr), config(Difficulty::CUSTOM, rows, cols, mines)
 {
     Initialize(rows, cols, mines);
-    // Notify();
-    state = PLAYING;
+    TransitionTo<ReadyState>();
+}
+
+Game::~Game()
+{
+    if (gameState) gameState->Exit();
 }
 
 void Game::NewGame(const DifficultyConfig &dc)
@@ -31,11 +35,21 @@ void Game::NewGame(std::size_t rows, std::size_t cols, std::size_t mines)
 void Game::Reveal(Index r, Index c)
 {
     // TODO: implement state pattern
+    if (state == READY)
+        TransitionTo<PlayingState>();
+
     gameState->Reveal(r, c);
+
+    if (CheckWin())
+    {
+        TransitionTo<GameOverState>();
+        BroadcastVictory();
+    }
 }
 
 void Game::Flag(Index r, Index c)
 {
+    if (state == READY) TransitionTo<PlayingState>();
     gameState->Flag(r, c);
 }
 

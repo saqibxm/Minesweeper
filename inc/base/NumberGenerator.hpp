@@ -11,7 +11,7 @@ namespace mines
         using Type = std::remove_const_t<std::remove_reference_t<T>>;
         static_assert(std::is_integral_v<Type>, "Type must be integral");
     public:
-        NumberGenerator(Type lo, Type hi) = default;
+        NumberGenerator(Type lo, Type hi);
         
         void Range(Type lo, Type hi);
         Type Generate();

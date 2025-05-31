@@ -36,19 +36,45 @@ set(
     SOURCES
     
     ./main.cpp
-    src/core/Cell.cpp
-    src/core/Game.cpp
-    src/core/Field.cpp
-    src/core/Controller.cpp
-    src/base/State.cpp
-    src/base/Command.cpp
-    #src/ui/Console/Console.cpp
-    #src/ui/Console/Display.cpp
+        ./common.h
+        ./utility.h
+
+        inc/base/Subject.hpp
+        inc/base/Observer.hpp
+        inc/base/Command.hpp
+        inc/base/State.hpp
+        inc/base/NumberGenerator.hpp
+
+        inc/core/Cell.hpp
+        inc/core/Controller.hpp
+        inc/core/Field.hpp
+        inc/core/Game.hpp
+
+        inc/ui/View.hpp
+        #inc/ui/Console/ConsoleView.hpp
+
+        inc/ui/Graphics/GraphicalView.hpp
+        inc/ui/Graphics/DisplayConfig.hpp
+        inc/ui/Graphics/PlaceholderTexture.h
+        inc/ui/Graphics/Tile.hpp
+        inc/ui/Graphics/TextureManager.hpp
+        inc/ui/Graphics/Smiley.hpp
+
+        src/base/Command.cpp
+        src/base/State.cpp
+        src/base/NumberGenerator.cpp
+
+        src/core/Cell.cpp
+        src/core/Game.cpp
+        src/core/Field.cpp
+        src/core/Controller.cpp
     
-    src/ui/Graphics/GraphicalView.cpp
-    src/ui/Graphics/TextureManager.cpp
-    src/ui/Graphics/Tile.cpp
-    src/ui/Graphics/Smiley.cpp
+        src/ui/Graphics/GraphicalView.cpp
+        src/ui/Graphics/TextureManager.cpp
+        src/ui/Graphics/Tile.cpp
+        src/ui/Graphics/Smiley.cpp
+
+        #src/ui/Console/ConsoleView.cpp
 )
 
 

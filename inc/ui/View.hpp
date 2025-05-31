@@ -3,17 +3,16 @@
 #include <string>
 
 #include "common.h"
-#include "utility"
+#include "utility.h"
 #include "Observer.hpp"
 
 namespace mines
 {
-    struct DifficultyConfig;
     class Controller;
 
     interface IView : public IObserver
     {
-        virtual ~IView() = default;
+        ~IView() override = default;
         // virtual void GrantControl(Controller&) = ABSTRACT;
         virtual DifficultyConfig SelectDifficulty() = ABSTRACT;
         virtual void ShowMessage(const std::string &) = ABSTRACT;

@@ -15,7 +15,7 @@ namespace mines
     class State
     {
     public:
-        State(Game &ctx) : context(ctx) {}
+        explicit State(Game &ctx) : context(ctx) {}
         virtual ~State() = default;
 
         virtual void Enter() = ABSTRACT;

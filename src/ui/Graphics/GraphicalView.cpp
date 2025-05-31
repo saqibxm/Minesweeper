@@ -218,13 +218,14 @@ void Graphics::CountersReceived(unsigned revealCount, unsigned flagCount)
 
 void Graphics::Ended()
 {
+    message.setString("Won!");
     smiley.Happy();
 }
 
 void Graphics::Lost(Index r, Index c) // the coordinates of the cell that exploded
 {
     tiles[r][c].UpdateTexture(texman.FetchPtr("blast"));
-    message.setString("Game Lost!");
+    message.setString("Lost!");
 
     smiley.Kill();
 }

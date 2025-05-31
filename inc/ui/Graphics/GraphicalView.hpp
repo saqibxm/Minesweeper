@@ -27,7 +27,7 @@ namespace mines
     
     void Update(const BoardSnapshot &snap) override;
     void CellUpdate(Index r, Index c, const Cell&) override;
-    void DataReceived(unsigned rc, unsigned fc) override;
+    void CountersReceived(unsigned rc, unsigned fc) override;
     void Ended() override;
     void Lost(Index r, Index c) override;
     

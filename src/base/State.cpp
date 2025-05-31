@@ -50,7 +50,7 @@ void PlayingState::Reveal(Index row, Index col)
         context.BroadcastCellChange(r, c, context.CellAt(r, c));
     });
 
-    context.BroadcastData(context.ClearCount(), context.FlagCount());
+    context.BroadcastCounterData(context.ClearCount(), context.FlagCount());
 
     if(context.CellAt(row, col).mine())
     {
@@ -64,7 +64,7 @@ void PlayingState::Flag(Index row, Index col)
     context.FlagCell(row, col);
     context.BroadcastCellChange(row, col, context.CellAt(row, col));
 
-    context.BroadcastData(context.ClearCount(), context.FlagCount());
+    context.BroadcastCounterData(context.ClearCount(), context.FlagCount());
 }
 
 GameOverState::GameOverState(Game &ctx) : State(ctx)

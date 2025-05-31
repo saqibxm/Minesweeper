@@ -194,7 +194,7 @@ void Graphics::CellUpdate(Index row, Index col, const Cell& cell)
     RefreshTexture(row, col, cell);
 }
 
-void Graphics::DataReceived(unsigned revealCount, unsigned flagCount)
+void Graphics::CountersReceived(unsigned revealCount, unsigned flagCount)
 {
     data.setString(
         "Revealed : " + std::to_string(revealCount)

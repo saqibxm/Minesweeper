@@ -61,7 +61,7 @@ private:
     bool CheckWin() const;
     
     std::list<IObserver*> observers;
-    void BroadcastData(unsigned, unsigned) override;
+    void BroadcastCounterData(unsigned, unsigned) override;
     void BroadcastCellChange(Index, Index, const Cell&) override;
     void BroadcastGameOver(Index, Index) override;
     void BroadcastVictory() override;

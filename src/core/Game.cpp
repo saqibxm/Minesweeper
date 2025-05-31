@@ -53,10 +53,10 @@ void Game::Notify() // override
         pobs->Update(snap);
 }
 
-void Game::BroadcastData(unsigned revealCount, unsigned flagCount)
+void Game::BroadcastCounterData(unsigned revealCount, unsigned flagCount)
 {
     for(auto pobs : observers)
-        pobs->DataReceived(revealCount, flagCount);
+        pobs->CountersReceived(revealCount, flagCount);
 }
 
 void Game::BroadcastCellChange(Index row, Index col, const Cell &cell) // override

@@ -8,9 +8,11 @@ RevealCommand::RevealCommand(Index r, Index c)
 {
 }
 
-void RevealCommand::Execute(Game &model)
+bool RevealCommand::Execute(Game &model)
 {
+    if (model.CellAt(row, col).revealed()) return false;
     model.Reveal(row, col);
+    return true;
 }
 
 
@@ -19,14 +21,16 @@ FlagCommand::FlagCommand(Index r, Index c)
 {
 }
 
-void FlagCommand::Execute(Game &model)
+bool FlagCommand::Execute(Game &model)
 {
     model.Flag(row, col);
+    return true;
 }
 
-void NewGameCommand::Execute(Game &model)
+bool NewGameCommand::Execute(Game &model)
 {
     model.NewGame(model.CurrentConfig());
+    return true;
 }
 
 NewCustomGameCommand::NewCustomGameCommand(const DifficultyConfig &dc)
@@ -34,7 +38,8 @@ NewCustomGameCommand::NewCustomGameCommand(const DifficultyConfig &dc)
 {
 }
 
-void NewCustomGameCommand::Execute(Game &model)
+bool NewCustomGameCommand::Execute(Game &model)
 {
     model.NewGame(diff);
+    return true;
 }

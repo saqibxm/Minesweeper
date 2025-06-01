@@ -27,7 +27,10 @@ Controller::~Controller()
 
 void Controller::HandleCommand(std::unique_ptr<ICommand> cmd)
 {
-    commands.push(std::move(cmd));
+    bool success = cmd->Execute(model);
 
-    commands.top()->Execute(model);
+    if (success)
+        commands.push(std::move(cmd));
+
+    // commands.top()->Execute(model);
 }

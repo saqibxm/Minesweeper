@@ -13,6 +13,13 @@ namespace mines
 
     struct DifficultyConfig
     {
+        friend bool operator==(const DifficultyConfig &lhs, const DifficultyConfig &rhs)
+        {
+            return lhs.level == rhs.level
+            && lhs.rows == rhs.rows
+            && lhs.cols == rhs.cols
+            && lhs.mines == rhs.mines;
+        }
         Difficulty level;
         std::size_t rows, cols;
         unsigned mines;

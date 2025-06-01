@@ -5,7 +5,8 @@ using namespace mines;
 Smiley::Smiley(TextureManager &texman, ClickCallback cb)
     : Tile(nullptr), manager(texman), callback(std::move(cb))
 {
-    Tile::UpdateTexture(manager.PlaceholderPtr());
+    // Tile::UpdateTexture(manager.PlaceholderPtr());
+    UpdateFace(SMILE);
 }
 
 void Smiley::draw(sf::RenderTarget &target, sf::RenderStates state) const
@@ -47,7 +48,7 @@ Smiley& Smiley::Released(sf::Vector2i pos)
 
 Smiley& Smiley::React()
 {
-    if(face != DEAD)
+    if(face != DEAD && face != HAPPY)
     {
         UpdateFace(SURPRISED);
     }

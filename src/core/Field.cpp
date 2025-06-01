@@ -10,13 +10,14 @@
 
 using namespace mines;
 
-std::default_random_engine Field::randeng{ std::random_device{}() };
+NumberGenerator<Index> Field::generator;
 // watch out for static order initilization fiasco
 
 Field::Field(Index n_rows, Index n_cols, unsigned n_mines)
     : total_mines(n_mines), rows(n_rows), cols(n_cols)
     , board(rows, Grid::value_type(cols))
 {
+    generator.Range(0, (rows * cols) - 1);
     PlaceMines();
 }
 
@@ -25,6 +26,9 @@ void Field::Initialize(Index n_rows, Index n_cols, unsigned n_mines)
     rows = n_rows;
     cols = n_cols;
     total_mines = n_mines;
+
+    auto range = std::make_pair(0, (rows * cols) - 1);
+    generator.Range(range.first, range.second);
 
     board.assign(rows, Grid::value_type(cols));
     PlaceMines();
@@ -52,11 +56,11 @@ void Field::PlaceMines()
     std::vector<Index> indices(rows * cols);
 
     std::iota(indices.begin(), indices.end(), decltype(indices)::value_type{0}); // fill the indices with consecutive integers starting from 0
-    std::shuffle(indices.begin(), indices.end(), randeng); // shuffle the indices
+    std::shuffle(indices.begin(), indices.end(), generator.UnderlyingEngine()); // shuffle the indices
 
     for (int i = 0; i < total_mines; ++i)
     {
-        auto [row, col] = translate_index(indices[i]);
+        auto [row, col] = TranslateFlatIndex(indices[i]);
         // mines.emplace_back(row, col); // put the index into mine* list
         board[row][col].mine(true); // set the cell to be a mine
     }
@@ -92,7 +96,7 @@ void Field::RevealCell(Index row, Index col, const RevealCallback &callback)
         callback(r, c); // run the callback on this index, subject of removal
         
         if(current.mine())
-            RevealMinesAndFlags(callback);
+            ShowMinesAndFlags(callback);
 
         // Only continue expansion for cells with zero proximity
         if (current.proximity() != 0 || current.mine()) continue;
@@ -143,7 +147,7 @@ void Field::UpdateProximity()
         {
             if (board[i][j].mine())
                 continue;
-            board[i][j].proximity(compute_adjacency(i, j));
+            board[i][j].proximity(ComputeAdjacency(i, j));
         }
     }
 }
@@ -151,7 +155,7 @@ void Field::UpdateProximity()
 void Field::UpdateProximity(Index row, Index col)
 {
     if(board[row][col].mine()) return;
-    board[row][col].proximity(compute_adjacency(row, col));
+    board[row][col].proximity(ComputeAdjacency(row, col));
 }
 
 /*
@@ -162,7 +166,7 @@ Cell& Field::CellAt(Index row, Index col)
 }
 */
 
-void Field::RevealMinesAndFlags(const RevealCallback &callback)
+void Field::ShowMinesAndFlags(const RevealCallback &callback)
 {
     // TODO: Optimise
     for(std::size_t i = 0; i < board.size(); ++i)
@@ -185,19 +189,16 @@ Cell& Field::operator[](Index idx)
 
 const Cell& Field::operator[](Index idx) const
 {
-    auto [row, col] = translate_index(idx);
+    auto [row, col] = TranslateFlatIndex(idx);
     return board[row][col];
 }
 
-Index Field::get_randnum()
+Index Field::RandomNumber()
 {
-    auto range = std::make_pair(0, (rows * cols) - 1);
-    static std::uniform_int_distribution<Index> dist(range.first, range.second);
-
-    return dist(Field::randeng);
+    return generator.Generate();
 }
 
-short Field::compute_adjacency(Index row, Index col) const
+short Field::ComputeAdjacency(Index row, Index col) const
 {
     short count = 0;
 

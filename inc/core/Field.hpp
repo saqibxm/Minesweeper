@@ -10,6 +10,7 @@
 #include "Cell.hpp"
 #include "common.h"
 #include "utility.h"
+#include "NumberGenerator.hpp"
 
 namespace mines
 {
@@ -53,11 +54,11 @@ namespace mines
         unsigned cleared = 0;
         int flagged = 0;
 
-        void RevealMinesAndFlags(const RevealCallback &cb); // in the case of lose/win
-        /* static */ Index get_randnum();
-        static std::default_random_engine randeng;
-        short compute_adjacency(Index, Index) const;
-        UPair<Index> translate_index(Index idx) const { return TranslateIndex(idx, cols); }
+        static NumberGenerator<Index> generator;
+        void ShowMinesAndFlags(const RevealCallback &cb); // in the case of lose/win
+        /* static */ Index RandomNumber();
+        short ComputeAdjacency(Index, Index) const;
+        UPair<Index> TranslateFlatIndex(Index idx) const { return TranslateIndex(idx, cols); }
     };
 }
 

@@ -6,6 +6,8 @@ Game::Game(std::size_t rows, std::size_t cols, std::size_t mines)
     : gameState(nullptr), config(Difficulty::CUSTOM, rows, cols, mines)
 {
     Initialize(rows, cols, mines);
+    BroadcastConfigChange();
+    Notify();
     TransitionTo<ReadyState>();
 }
 
@@ -16,7 +18,11 @@ Game::~Game()
 
 void Game::NewGame(const DifficultyConfig &dc)
 {
-    config = dc;
+    if (config != dc)
+    {
+        config = dc;
+        BroadcastConfigChange();
+    }
     gameState->NewGame(dc);
     TransitionTo<ReadyState>();
     Notify();
@@ -67,6 +73,7 @@ void Game::Attach(IObserver *obs) // override
 {
     Detach(obs); // remove if already exists
     observers.push_back(obs);
+    BroadcastConfigChange();
     Notify();
 }
 
@@ -80,7 +87,7 @@ void Game::Notify() // override
     if(observers.empty()) return;
 
     auto [rows, cols] = Dimensions();
-    BoardSnapshot snap = {rows, cols, MineCount(), Board()};
+    BoardSnapshot snap = {config, Board()};
 
     for(auto pobs : observers)
         pobs->Update(snap);
@@ -97,6 +104,13 @@ void Game::BroadcastCellChange(Index row, Index col, const Cell &cell) // overri
     for(auto pobs : observers)
         pobs->CellUpdate(row, col, CellAt(row, col));
 }
+
+void Game::BroadcastConfigChange()
+{
+    for (auto pobs : observers)
+        pobs->ConfigUpdate(config);
+}
+
 
 void Game::BroadcastGameOver(Index r, Index c) // override
 {

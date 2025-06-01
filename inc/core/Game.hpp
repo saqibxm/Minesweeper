@@ -19,8 +19,7 @@ struct BoardSnapshot
         bool is_flagged;
         short neighbour_mines;
     };
-    std::size_t rows, cols;
-    std::size_t mines;
+    DifficultyConfig lvl;
     Field::Grid cells;
 };
 
@@ -70,6 +69,7 @@ private:
     std::list<IObserver*> observers;
     void BroadcastCounterData(unsigned, unsigned) override;
     void BroadcastCellChange(Index, Index, const Cell&) override;
+    void BroadcastConfigChange() override;
     void BroadcastGameOver(Index, Index) override;
     void BroadcastVictory() override;
 };

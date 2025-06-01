@@ -14,24 +14,6 @@ Graphics::Graphics(Controller &ctrl)
     using namespace DisplayConfig;
 
     auto [rows, cols] = context.ModelSize();
-    /*
-    // tiles.assign(rows, decltype(tiles)::value_type(cols));
-    tiles.reserve(rows);
-    
-    decltype(tiles)::value_type vec;
-    vec.reserve(cols);
-    
-    for(decltype(rows) i = 0; i < rows; ++i)
-    {
-        for(decltype(cols) j = 0; j < cols; ++j)
-        {
-            vec.emplace_back(texman.PlaceholderPtr())
-            .UpdatePosition(TileWidth * j, (TileHeight * i) + HeaderHeight);
-            // RefreshTexture(i, j); // segfault, for obvious reasons
-        }
-        tiles.push_back(std::move(vec));
-    }
-    */
 
     smiley.OnClick([this] { context.HandleCommand(std::make_unique<NewGameCommand>()); });
     
@@ -40,16 +22,13 @@ Graphics::Graphics(Controller &ctrl)
     std::ignore = font.openFromFile("assets/Monocraft.ttf"); // TODO: remove hardcodes
 
     smiley.UpdateSize(64, 64);
-    smiley.UpdateTexture(texman.FetchPtr("smileface"));
 
     message.setFillColor(sf::Color::White);
     message.setPosition(sf::Vector2f(10.0f, 10.0f));
-    message.setString("Minesweeper");
     message.setCharacterSize(14);
 
     data.setFillColor(sf::Color::White);
     data.setPosition(sf::Vector2f(10.0f, 30.0f));
-    data.setString("Data");
     data.setCharacterSize(12);
 
 #ifndef NDEBUG
@@ -62,24 +41,24 @@ Graphics::Graphics(Controller &ctrl)
 #endif /* NDEBUG */
 }
 
-void Graphics::Reset(const BoardSnapshot &snap)
+void Graphics::Reset(const DifficultyConfig &cfg)
 {
     using namespace DisplayConfig;
-    window.create(DisplayConfig::ComputeVideoMode({snap.rows, snap.cols}), DisplayConfig::Title, sf::Style::Close);
+
     auto [windowWidth, windowHeight] = window.getSize();
     auto [smileyWidth, smileyHeight] = smiley.RetrieveSize();
 
     smiley.UpdatePosition((windowWidth / 2) - smileyWidth, (HeaderHeight / 2) - smileyHeight);
 
     tiles.clear();
-    tiles.reserve(snap.rows);
+    tiles.reserve(cfg.rows);
     
     decltype(tiles)::value_type vec;
-    vec.reserve(snap.cols);
+    vec.reserve(cfg.cols);
 
-    for(decltype(snap.rows) i = 0; i < snap.rows; ++i)
+    for(decltype(cfg.rows) i = 0; i < cfg.rows; ++i)
     {
-        for(decltype(snap.cols) j = 0; j < snap.cols; ++j)
+        for(decltype(cfg.cols) j = 0; j < cfg.cols; ++j)
         {
             vec.emplace_back(texman.PlaceholderPtr())
                 .UpdatePosition(TileWidth * j, (TileHeight * i) + HeaderHeight);
@@ -87,6 +66,9 @@ void Graphics::Reset(const BoardSnapshot &snap)
         }
         tiles.push_back(std::move(vec));
     }
+
+    message.setString("Minesweeper");
+    data.setString("Data");
 }
 
 DifficultyConfig Graphics::SelectDifficulty()
@@ -147,7 +129,7 @@ void Graphics::Display()
         debugInfo.setString(
             "row: " + std::to_string(row)
             + "\ncol: " + std::to_string(col)
-            + '\n' + (cell.mine() ? "mine" : "clean")
+            + '\n' + (cell.mine() ? "mine" : "clean") + '\t' + (cell.state() == Cell::HIDDEN ? "hidden" : "revealed")
             + '\n' + (cell.flagged() ? "flagged" : "unflagged")
             + "\nproximity: " + std::to_string(cell.proximity())
             + "\ntexture: " + tiles[row][col].tex
@@ -193,7 +175,7 @@ void Graphics::Update(const BoardSnapshot &snap)
 #ifndef NDEBUG
     lastSnap = snap;
 #endif // NDEBUG
-    Reset(snap);
+    Reset(snap.lvl);
     // assert(ctx == std::addressof(this->context)); // assert that its coming from the same context as held by this view
     
     for(decltype(tiles)::size_type ic = 0, ie = tiles.size(); ic < ie; ++ic)
@@ -206,6 +188,10 @@ void Graphics::Update(const BoardSnapshot &snap)
 void Graphics::CellUpdate(Index row, Index col, const Cell& cell)
 {
     RefreshTexture(row, col, cell);
+
+#ifndef NDEBUG
+    lastSnap.cells[row][col] = cell;
+#endif // NDEBUG
 }
 
 void Graphics::CountersReceived(unsigned revealCount, unsigned flagCount)
@@ -215,6 +201,14 @@ void Graphics::CountersReceived(unsigned revealCount, unsigned flagCount)
         + "\nFlagged: " + std::to_string(flagCount)
     );
 }
+
+void Graphics::ConfigUpdate(const DifficultyConfig &config)
+{
+    window.create(DisplayConfig::ComputeVideoMode({config.rows, config.cols}), DisplayConfig::Title, sf::Style::Close);
+
+    Reset(config);
+}
+
 
 void Graphics::Ended()
 {

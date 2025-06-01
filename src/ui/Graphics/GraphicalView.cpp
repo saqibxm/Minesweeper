@@ -280,19 +280,14 @@ void Graphics::HandleClickReleased(const sf::Event::MouseButtonReleased &mouse)
     auto coords = CalculateCellCoord(x, y);
 
     smiley.Released(mouse.position);
-    if(!coords && smiley.BoundingPos().contains(sf::Vector2f(mouse.position)))
-    {
-        // context.HandleCommand(std::make_unique<NewGameCommand>());
-    }
-    else
-    {
-        auto [row, col] = *coords;
-    
-        if(mouse.button == sf::Mouse::Button::Left)
-            context.HandleCommand(std::make_unique<RevealCommand>(row, col));
-        else if(mouse.button == sf::Mouse::Button::Right)
-            context.HandleCommand(std::make_unique<FlagCommand>(row, col));
-    }
+    if (!coords) return;
+
+    auto [row, col] = *coords;
+
+    if(mouse.button == sf::Mouse::Button::Left)
+        context.HandleCommand(std::make_unique<RevealCommand>(row, col));
+    else if(mouse.button == sf::Mouse::Button::Right)
+        context.HandleCommand(std::make_unique<FlagCommand>(row, col));
 }
 
 void Graphics::HandleClicked(const sf::Event::MouseButtonPressed &mouse)

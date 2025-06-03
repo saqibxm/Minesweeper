@@ -121,8 +121,15 @@ void Game::BroadcastGameOver(Index r, Index c) // override
 void Game::BroadcastVictory()
 {
     for(auto pobs : observers)
-        pobs->Ended();
+        pobs->Won();
 }
+
+void Game::BroadcastTimerUpdate(double seconds)
+{
+    for (auto pobs : observers)
+        pobs->TimeReceived(seconds);
+}
+
 
 void Game::TransitionTo(std::unique_ptr<State> next)
 {

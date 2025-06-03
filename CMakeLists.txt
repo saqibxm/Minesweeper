@@ -38,6 +38,7 @@ set(
     ./main.cpp
         ./common.h
         ./utility.h
+        ./stopwatch.h
 
         inc/base/Subject.hpp
         inc/base/Observer.hpp
@@ -54,7 +55,7 @@ set(
         #inc/ui/Console/ConsoleView.hpp
 
         inc/ui/Graphics/GraphicalView.hpp
-        inc/ui/Graphics/DisplayConfig.hpp
+        inc/ui/Graphics/LayoutConfig.hpp
         inc/ui/PlaceholderTexture.h
         inc/ui/Graphics/Tile.hpp
         inc/ui/Graphics/TextureManager.hpp

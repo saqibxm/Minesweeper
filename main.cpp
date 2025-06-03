@@ -11,5 +11,8 @@ int main()
     game.Attach(&view);
 
     while(!view.ShouldClose())
+    {
         view.Display();
+        ctrl.Update();
+    }
 }

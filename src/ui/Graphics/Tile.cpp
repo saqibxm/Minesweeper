@@ -1,5 +1,5 @@
 #include "Graphics/Tile.hpp"
-#include "Graphics/DisplayConfig.hpp"
+#include "Graphics/LayoutConfig.hpp"
 
 using namespace mines;
 using namespace mines::DisplayConfig;

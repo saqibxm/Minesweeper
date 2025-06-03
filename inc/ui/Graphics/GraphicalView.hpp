@@ -31,8 +31,9 @@ namespace mines
         void Update(const BoardSnapshot &snap) override;
         void CellUpdate(Index r, Index c, const Cell&) override;
         void CountersReceived(unsigned rc, unsigned fc) override;
+        void TimeReceived(double) override;
         void ConfigUpdate(const DifficultyConfig &) override;
-        void Ended() override;
+        void Won() override;
         void Lost(Index r, Index c) override;
     
     private:
@@ -44,6 +45,7 @@ namespace mines
 
         Smiley smiley; // The smiley face
         Counter flagCounter;
+        Counter timeCounter;
 
         sf::Font font;
         sf::Text message{font};

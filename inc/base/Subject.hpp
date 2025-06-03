@@ -19,5 +19,7 @@ namespace mines
         virtual void BroadcastGameOver(Index, Index) = ABSTRACT; // notify observers on game end, flag indicates victory
         virtual void BroadcastConfigChange() = ABSTRACT;
         virtual void BroadcastVictory() = ABSTRACT;
+        virtual void BroadcastTimerUpdate(double) = ABSTRACT;
+        // virtual void BroadcastShutdown() = ABSTRACT;
     };
 }

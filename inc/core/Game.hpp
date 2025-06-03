@@ -23,7 +23,7 @@ struct BoardSnapshot
     Field::Grid cells;
 };
 
-class Game : public ISubject, public Field // Field is not a dynamic class
+class Game final : public ISubject, public Field // Field is not a dynamic class
 {
     enum EState { READY, PLAYING, ENDED, INDETERMINATE };
     friend class ReadyState;
@@ -58,6 +58,8 @@ public:
 
     EState CurrentState() const { return state; }
     DifficultyConfig CurrentConfig() const { return config; }
+
+    void BroadcastTimerUpdate(double seconds) override;
 
 private:
     EState state;

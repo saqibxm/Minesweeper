@@ -43,3 +43,14 @@ bool NewCustomGameCommand::Execute(Game &model)
     model.NewGame(diff);
     return true;
 }
+
+TimerUpdateCommand::TimerUpdateCommand(double secs)
+    : seconds(secs)
+{
+}
+
+bool TimerUpdateCommand::Execute(Game &model)
+{
+    model.BroadcastTimerUpdate(seconds);
+    return true;
+}

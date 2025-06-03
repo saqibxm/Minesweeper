@@ -19,38 +19,56 @@ Controller::Controller(Game *p_model, bool graphical)
 Controller::Controller(Game &gameModel) : model(gameModel)
 {
     // commands.reserve(100);
+    timer.reset();
 }
 
 Controller::~Controller()
 {
 }
 
+void Controller::Update()
+{
+    auto cmd = std::make_unique<TimerUpdateCommand>(timer.elapsed());
+    cmd->Execute(model);
+}
+
+
 void Controller::RevealRequested(Index r, Index c)
 {
     auto cmd = std::make_unique<RevealCommand>(r, c);
-    HandleCommand(std::move(cmd));
+    bool success = HandleCommand(std::move(cmd));
+
+    if (success && !timer.is_running())
+        timer.start();
 }
 
 void Controller::FlagRequested(Index r, Index c)
 {
     auto cmd = std::make_unique<FlagCommand>(r, c);
-    HandleCommand(std::move(cmd));
+    auto success = HandleCommand(std::move(cmd));
+
+    if (success && !timer.is_running())
+        timer.start();
 }
 
 void Controller::NewGameRequested(const DifficultyConfig &cfg)
 {
     auto cmd = std::make_unique<NewCustomGameCommand>(cfg);
     HandleCommand(std::move(cmd));
+
+    timer.reset();
 }
 
 void Controller::NewGameRequested()
 {
     auto cmd = std::make_unique<NewGameCommand>();
     HandleCommand(std::move(cmd));
+
+    timer.reset();
 }
 
 
-void Controller::HandleCommand(std::unique_ptr<ICommand> cmd)
+bool Controller::HandleCommand(std::unique_ptr<ICommand> cmd)
 {
     bool success = cmd->Execute(model);
 
@@ -58,4 +76,5 @@ void Controller::HandleCommand(std::unique_ptr<ICommand> cmd)
         commands.push(std::move(cmd));
 
     // commands.top()->Execute(model);
+    return success;
 }

@@ -3,13 +3,13 @@
 #include <chrono>
 
 #include "Graphics/GraphicalView.hpp"
-#include "Graphics/DisplayConfig.hpp"
+#include "Graphics/LayoutConfig.hpp"
 #include "Controller.hpp"
 
 using namespace mines;
 
 Graphics::Graphics(Controller &ctrl)
-    : context(ctrl), smiley(texman), flagCounter(texman)
+    : context(ctrl), smiley(texman), flagCounter(texman), timeCounter(texman)
 {
     using namespace DisplayConfig;
 
@@ -32,6 +32,7 @@ Graphics::Graphics(Controller &ctrl)
     data.setCharacterSize(12);
 
     flagCounter.UpdateSize(25, 50);
+    timeCounter.UpdateSize(25, 50);
 
 #ifndef NDEBUG
     debugInfo.setPosition(sf::Vector2f(10.f, TileHeight * rows + HeaderHeight));
@@ -52,6 +53,7 @@ void Graphics::Reset(const DifficultyConfig &cfg)
 
     smiley.UpdatePosition((windowWidth / 2) - smileyWidth, (HeaderHeight / 2) - smileyHeight);
     flagCounter.UpdatePosition(windowWidth / 1.5f, (HeaderHeight / 2) - flagCounter.RetrieveSize().y / 2);
+    timeCounter.UpdatePosition(windowWidth / 1.5f, (HeaderHeight / 2) - flagCounter.RetrieveSize().y / 2);
 
     message.setString("Minesweeper");
     data.setString("Data");
@@ -98,7 +100,8 @@ void Graphics::Display()
     }
 
     // window.draw(tiles);
-    window.draw(flagCounter);
+    window.draw(timeCounter);
+    // window.draw(flagCounter);
     window.draw(message);
     window.draw(data);
     window.draw(smiley);
@@ -195,6 +198,12 @@ void Graphics::CountersReceived(unsigned revealCount, unsigned flagCount)
     flagCounter.SetNumber(mines - flagCount);
 }
 
+void Graphics::TimeReceived(double seconds)
+{
+    timeCounter.SetNumber(seconds);
+}
+
+
 void Graphics::ConfigUpdate(const DifficultyConfig &config)
 {
     window.create(DisplayConfig::ComputeVideoMode({config.rows, config.cols}), DisplayConfig::Title, sf::Style::Close);
@@ -220,7 +229,7 @@ void Graphics::ConfigUpdate(const DifficultyConfig &config)
     Reset(config);
 }
 
-void Graphics::Ended()
+void Graphics::Won()
 {
     message.setString("Won!");
     smiley.Happy();

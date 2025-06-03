@@ -51,4 +51,14 @@ private:
     DifficultyConfig diff;
 };
 
+class TimerUpdateCommand final : public ICommand
+{
+public:
+    TimerUpdateCommand(double secs);
+    bool Execute(Game &) override;
+
+private:
+    double seconds;
+};
+
 }

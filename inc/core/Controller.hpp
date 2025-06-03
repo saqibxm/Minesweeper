@@ -7,6 +7,7 @@
 #include "Game.hpp" // convert to an interface?
 #include "View.hpp"
 #include "Command.hpp"
+#include "stopwatch.h"
 
 namespace mines
 {
@@ -17,7 +18,8 @@ public:
     Controller(Game &gameModel);
     ~Controller();
 
-    void HandleCommand(std::unique_ptr<ICommand>);
+    void Update();
+
     void RevealRequested(Index, Index);
     void FlagRequested(Index, Index);
     void NewGameRequested();
@@ -28,14 +30,16 @@ public:
 
 private:
     Game &model;
-    // std::unique_ptr<IView> view;
+    Stopwatch timer;
 
-    bool running; // when the main view requests shut down set to false
+    // bool running; // when the main view requests shut down set to false
 
-    std::stack<
+    std::stack <
         std::unique_ptr<ICommand>,
         std::vector<std::unique_ptr<ICommand>>
     > commands;
+
+    bool HandleCommand(std::unique_ptr<ICommand>);
 };
 
 }

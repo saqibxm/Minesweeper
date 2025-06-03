@@ -16,7 +16,7 @@ namespace mines
 
         // Tile(const sf::Texture &init);
 
-        Tile(sf::Texture *init);
+        Tile(sf::Texture *init = nullptr);
         
         void draw(sf::RenderTarget& target, sf::RenderStates state) const override;
 

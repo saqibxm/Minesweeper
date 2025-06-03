@@ -18,6 +18,11 @@ public:
     ~Controller();
 
     void HandleCommand(std::unique_ptr<ICommand>);
+    void RevealRequested(Index, Index);
+    void FlagRequested(Index, Index);
+    void NewGameRequested();
+    void NewGameRequested(const DifficultyConfig &);
+    void ShutdownRequested();
     // Cell& FetchCell(Index, Index);
     UPair<unsigned> ModelSize() const { return model.Dimensions(); }
 

@@ -5,11 +5,13 @@
 
 #include <SFML/Graphics.hpp>
 
+#include "TextureManager.hpp"
 #include "View.hpp"
 #include "Game.hpp"
 #include "Tile.hpp"
-#include "TextureManager.hpp"
 #include "Smiley.hpp"
+#include "Grid.hpp"
+#include "Counter.hpp"
 
 namespace mines
 {
@@ -41,9 +43,13 @@ namespace mines
         TextureManager texman;
 
         Smiley smiley; // The smiley face
+        Counter flagCounter;
+
         sf::Font font;
         sf::Text message{font};
         sf::Text data{font};
+
+        unsigned mines = 0;
 
         void HandleClicked(const sf::Event::MouseButtonPressed&);
         void HandleClickReleased(const sf::Event::MouseButtonReleased&);

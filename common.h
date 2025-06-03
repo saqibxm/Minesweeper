@@ -12,7 +12,7 @@ constexpr inline bool debug =
 #endif
 ;
 
-#include <cstdint>
+#include <cstddef>
 
 namespace mines
 {

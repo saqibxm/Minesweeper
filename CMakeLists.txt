@@ -55,10 +55,12 @@ set(
 
         inc/ui/Graphics/GraphicalView.hpp
         inc/ui/Graphics/DisplayConfig.hpp
-        inc/ui/Graphics/PlaceholderTexture.h
+        inc/ui/PlaceholderTexture.h
         inc/ui/Graphics/Tile.hpp
         inc/ui/Graphics/TextureManager.hpp
         inc/ui/Graphics/Smiley.hpp
+        inc/ui/Graphics/Counter.hpp
+        #inc/ui/Graphics/Block.hpp
 
         src/base/Command.cpp
         src/base/State.cpp
@@ -73,6 +75,8 @@ set(
         src/ui/Graphics/TextureManager.cpp
         src/ui/Graphics/Tile.cpp
         src/ui/Graphics/Smiley.cpp
+        src/ui/Graphics/Counter.cpp
+        #src/ui/Graphics/Block.cpp
 
         #src/ui/Console/ConsoleView.cpp
 )

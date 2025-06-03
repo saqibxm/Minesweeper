@@ -9,13 +9,13 @@
 using namespace mines;
 
 Graphics::Graphics(Controller &ctrl)
-    : context(ctrl), smiley(texman)
+    : context(ctrl), smiley(texman), flagCounter(texman)
 {
     using namespace DisplayConfig;
 
     auto [rows, cols] = context.ModelSize();
 
-    smiley.OnClick([this] { context.HandleCommand(std::make_unique<NewGameCommand>()); });
+    smiley.OnClick([this] { context.NewGameRequested(); });
     
     window.setFramerateLimit(30);
     
@@ -30,6 +30,8 @@ Graphics::Graphics(Controller &ctrl)
     data.setFillColor(sf::Color::White);
     data.setPosition(sf::Vector2f(10.0f, 30.0f));
     data.setCharacterSize(12);
+
+    flagCounter.UpdateSize(25, 50);
 
 #ifndef NDEBUG
     debugInfo.setPosition(sf::Vector2f(10.f, TileHeight * rows + HeaderHeight));
@@ -49,26 +51,13 @@ void Graphics::Reset(const DifficultyConfig &cfg)
     auto [smileyWidth, smileyHeight] = smiley.RetrieveSize();
 
     smiley.UpdatePosition((windowWidth / 2) - smileyWidth, (HeaderHeight / 2) - smileyHeight);
-
-    tiles.clear();
-    tiles.reserve(cfg.rows);
-    
-    decltype(tiles)::value_type vec;
-    vec.reserve(cfg.cols);
-
-    for(decltype(cfg.rows) i = 0; i < cfg.rows; ++i)
-    {
-        for(decltype(cfg.cols) j = 0; j < cfg.cols; ++j)
-        {
-            vec.emplace_back(texman.PlaceholderPtr())
-                .UpdatePosition(TileWidth * j, (TileHeight * i) + HeaderHeight);
-            // RefreshTexture(i, j); // segfault, for obvious reasons
-        }
-        tiles.push_back(std::move(vec));
-    }
+    flagCounter.UpdatePosition(windowWidth / 1.5f, (HeaderHeight / 2) - flagCounter.RetrieveSize().y / 2);
 
     message.setString("Minesweeper");
     data.setString("Data");
+
+    mines = cfg.mines;
+    flagCounter.SetNumber(mines);
 }
 
 DifficultyConfig Graphics::SelectDifficulty()
@@ -108,23 +97,25 @@ void Graphics::Display()
         }
     }
 
+    // window.draw(tiles);
+    window.draw(flagCounter);
     window.draw(message);
     window.draw(data);
     window.draw(smiley);
 
-    
 #ifndef NDEBUG
     auto [x, y] = sf::Mouse::getPosition(window);
-    
-    auto [fx, fy] = tiles.front().front().RetrievePosition();
-    auto [lx, ly] = tiles.back().back().RetrievePosition();
+
     auto [w, h] = std::make_pair(DisplayConfig::TileWidth, DisplayConfig::TileHeight);
+
     // info_debug.setPosition({x+20.0f, y+20.0f});
     debugInfo.setString("row: " + std::to_string(y/DisplayConfig::TileWidth) + "\ncol: " + std::to_string(x/DisplayConfig::TileHeight));
-    
-    if((x >= fx && x < lx + w) && (y >= fy && y < ly + h)) {
-        int row = (y - fy) / h;
-        int col = (x - fx) / w;
+
+    auto coords = CalculateCellCoord(x, y);
+
+    if(coords) {
+        int row = coords->first;
+        int col = coords->second;
         const auto &cell = lastSnap.cells[row][col];
         debugInfo.setString(
             "row: " + std::to_string(row)
@@ -177,7 +168,7 @@ void Graphics::Update(const BoardSnapshot &snap)
 #endif // NDEBUG
     Reset(snap.lvl);
     // assert(ctx == std::addressof(this->context)); // assert that its coming from the same context as held by this view
-    
+
     for(decltype(tiles)::size_type ic = 0, ie = tiles.size(); ic < ie; ++ic)
     {
         for(decltype(tiles)::value_type::size_type jc = 0, je = tiles.size(); jc < je; ++jc)
@@ -200,15 +191,34 @@ void Graphics::CountersReceived(unsigned revealCount, unsigned flagCount)
         "Revealed : " + std::to_string(revealCount)
         + "\nFlagged: " + std::to_string(flagCount)
     );
+
+    flagCounter.SetNumber(mines - flagCount);
 }
 
 void Graphics::ConfigUpdate(const DifficultyConfig &config)
 {
     window.create(DisplayConfig::ComputeVideoMode({config.rows, config.cols}), DisplayConfig::Title, sf::Style::Close);
 
+    const auto &cfg = config;
+    tiles.clear();
+    tiles.reserve(cfg.rows);
+
+    decltype(tiles)::value_type vec;
+    vec.reserve(cfg.cols);
+
+    for(decltype(cfg.rows) i = 0; i < cfg.rows; ++i)
+    {
+        for(decltype(cfg.cols) j = 0; j < cfg.cols; ++j)
+        {
+            vec.emplace_back(texman.PlaceholderPtr())
+                .UpdatePosition(DisplayConfig::TileWidth * j, (DisplayConfig::TileHeight * i) + DisplayConfig::HeaderHeight);
+            // RefreshTexture(i, j); // segfault, for obvious reasons
+        }
+        tiles.push_back(std::move(vec));
+    }
+
     Reset(config);
 }
-
 
 void Graphics::Ended()
 {
@@ -234,6 +244,7 @@ void Graphics::RefreshTexture(Index row, Index col, const Cell& cell)
 {
     // const auto &cell = context.Board().CellAt(row, col); // get the underlying (model's) cell for interogation
     auto &tile = tiles[row][col];
+    // auto &tile = tiles.Cell(row, col);
 
     std::string texture;
 
@@ -285,9 +296,9 @@ void Graphics::HandleClickReleased(const sf::Event::MouseButtonReleased &mouse)
     auto [row, col] = *coords;
 
     if(mouse.button == sf::Mouse::Button::Left)
-        context.HandleCommand(std::make_unique<RevealCommand>(row, col));
+        context.RevealRequested(row, col);
     else if(mouse.button == sf::Mouse::Button::Right)
-        context.HandleCommand(std::make_unique<FlagCommand>(row, col));
+        context.FlagRequested(row, col);
 }
 
 void Graphics::HandleClicked(const sf::Event::MouseButtonPressed &mouse)
@@ -317,7 +328,7 @@ std::optional<UPair<Index>> Graphics::CalculateCellCoord(float x, float y) const
     {
         Index row = (y - fy) / h;
         Index col = (x - fx) / w;
-        return UPair{row, col};
+        return UPair<Index>{row, col};
     }
     return std::nullopt;
 }

@@ -41,7 +41,7 @@ void Game::NewGame(std::size_t rows, std::size_t cols, std::size_t mines)
 void Game::Reveal(Index r, Index c)
 {
     // TODO: implement state pattern
-    if (state == READY)
+    if (state == EState::READY)
         TransitionTo<PlayingState>();
 
     gameState->Reveal(r, c);
@@ -55,7 +55,7 @@ void Game::Reveal(Index r, Index c)
 
 void Game::Flag(Index r, Index c)
 {
-    if (state == READY) TransitionTo<PlayingState>();
+    if (state == EState::READY) TransitionTo<PlayingState>();
     gameState->Flag(r, c);
 }
 

@@ -14,14 +14,14 @@ ReadyState::ReadyState(Game &ctx) : State(ctx)
 
 void ReadyState::Enter()
 {
-    context.state = context.READY;
+    context.state = EState::READY;
     // context.UpdateProximity();
     // context.Notify();
 }
 
 void ReadyState::Exit()
 {
-    context.state = context.INDETERMINATE;
+    context.state = EState::INDETERMINATE;
 }
 
 void ReadyState::Reveal(Index r, Index c)
@@ -48,12 +48,12 @@ void PlayingState::Enter()
 {
     // context.Notify();
     // notify the views that we are in playing state so they update
-    context.state = context.PLAYING;
+    context.state = EState::PLAYING;
 }
 
 void PlayingState::Exit()
 {
-    context.state = context.INDETERMINATE;
+    context.state = EState::INDETERMINATE;
 }
 
 void PlayingState::Reveal(Index row, Index col)
@@ -85,10 +85,10 @@ GameOverState::GameOverState(Game &ctx) : State(ctx)
 
 void GameOverState::Enter()
 {
-    context.state = context.ENDED;
+    context.state = EState::ENDED;
 }
 
 void GameOverState::Exit()
 {
-    context.state = context.INDETERMINATE;
+    context.state = EState::INDETERMINATE;
 }

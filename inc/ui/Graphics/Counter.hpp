@@ -19,6 +19,7 @@ public:
 
     void SetNumber(int val);
     int GetNumber() const;
+    void ResetNumber();
 
     void UpdateSize(float w, float h);
     void UpdatePosition(float x, float y);

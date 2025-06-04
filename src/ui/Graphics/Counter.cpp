@@ -38,7 +38,9 @@ void Counter::UpdatePosition(float x, float y)
 
 sf::Vector2f Counter::RetrieveSize() const
 {
-    return size;
+    auto sz = size;
+    sz.x *= digits.size();
+    return sz;
 }
 
 
@@ -71,6 +73,12 @@ int Counter::GetNumber() const
 {
     return value;
 }
+
+void Counter::ResetNumber()
+{
+    SetNumber(000);
+}
+
 
 void Counter::UpdateAllFaces()
 {

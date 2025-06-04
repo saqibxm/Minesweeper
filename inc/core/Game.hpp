@@ -25,7 +25,6 @@ struct BoardSnapshot
 
 class Game final : public ISubject, public Field // Field is not a dynamic class
 {
-    enum EState { READY, PLAYING, ENDED, INDETERMINATE };
     friend class ReadyState;
     friend class PlayingState;
     friend class GameOverState;
@@ -46,14 +45,7 @@ public:
     void Notify() override;
 
     template <typename T, typename = std::enable_if_t<std::is_base_of_v<State, T>>>
-    void TransitionTo()
-    {
-        if (gameState)
-            gameState->Exit();
-        gameState.reset(new T(*this));
-        gameState->Enter();
-    }
-
+    void TransitionTo();
     void TransitionTo(std::unique_ptr<State>);
 
     EState CurrentState() const { return state; }
@@ -75,5 +67,15 @@ private:
     void BroadcastGameOver(Index, Index) override;
     void BroadcastVictory() override;
 };
+
+template<typename T, typename>
+void Game::TransitionTo()
+{
+    if (gameState)
+        gameState->Exit();
+    gameState.reset(new T(*this));
+    gameState->Enter();
+}
+
 
 }

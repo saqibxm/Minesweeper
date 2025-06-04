@@ -24,15 +24,15 @@ Graphics::Graphics(Controller &ctrl)
     smiley.UpdateSize(64, 64);
 
     message.setFillColor(sf::Color::White);
-    message.setPosition(sf::Vector2f(10.0f, 10.0f));
     message.setCharacterSize(14);
+    message.setString("Minesweeper");
 
+    data.setString("Data");
     data.setFillColor(sf::Color::White);
-    data.setPosition(sf::Vector2f(10.0f, 30.0f));
     data.setCharacterSize(12);
 
-    flagCounter.UpdateSize(25, 50);
-    timeCounter.UpdateSize(25, 50);
+    flagCounter.UpdateSize(30, 50);
+    timeCounter.UpdateSize(30, 50);
 
 #ifndef NDEBUG
     debugInfo.setPosition(sf::Vector2f(10.f, TileHeight * rows + HeaderHeight));
@@ -52,11 +52,11 @@ void Graphics::Reset(const DifficultyConfig &cfg)
     auto [smileyWidth, smileyHeight] = smiley.RetrieveSize();
 
     smiley.UpdatePosition((windowWidth / 2) - smileyWidth, (HeaderHeight / 2) - smileyHeight);
-    flagCounter.UpdatePosition(windowWidth / 1.5f, (HeaderHeight / 2) - flagCounter.RetrieveSize().y / 2);
     timeCounter.UpdatePosition(windowWidth / 1.5f, (HeaderHeight / 2) - flagCounter.RetrieveSize().y / 2);
+    flagCounter.UpdatePosition((windowWidth / 3.0f) - timeCounter.RetrieveSize().x, (HeaderHeight / 2) - flagCounter.RetrieveSize().y / 2);
 
-    message.setString("Minesweeper");
-    data.setString("Data");
+    message.setPosition(sf::Vector2f(10.0f, 10.0f));
+    data.setPosition(sf::Vector2f(10.0f, 30.0f));
 
     mines = cfg.mines;
     flagCounter.SetNumber(mines);
@@ -101,7 +101,7 @@ void Graphics::Display()
 
     // window.draw(tiles);
     window.draw(timeCounter);
-    // window.draw(flagCounter);
+    window.draw(flagCounter);
     window.draw(message);
     window.draw(data);
     window.draw(smiley);
@@ -177,6 +177,8 @@ void Graphics::Update(const BoardSnapshot &snap)
         for(decltype(tiles)::value_type::size_type jc = 0, je = tiles.size(); jc < je; ++jc)
             RefreshTexture(ic, jc, snap.cells[ic][jc]);
     }
+
+    timeCounter.ResetNumber();
 }
 
 void Graphics::CellUpdate(Index row, Index col, const Cell& cell)

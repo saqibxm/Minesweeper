@@ -5,7 +5,7 @@
 
 namespace mines
 {
-    // enum class GameStates { READY, PLAYING, ENDED };
+    enum class EState { READY, PLAYING, ENDED, INDETERMINATE };
 
     /**
      * Game Model Finite State Machine

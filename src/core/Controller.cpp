@@ -28,13 +28,15 @@ Controller::~Controller()
 
 void Controller::Update()
 {
-    auto cmd = std::make_unique<TimerUpdateCommand>(timer.elapsed());
-    cmd->Execute(model);
+    if (model.CurrentState() != EState::PLAYING) return;
+    HandleCommand(std::make_unique<TimerUpdateCommand>(timer.elapsed()));
 }
 
 
 void Controller::RevealRequested(Index r, Index c)
 {
+    if (model.CurrentState() == EState::READY) timer.start();
+
     auto cmd = std::make_unique<RevealCommand>(r, c);
     bool success = HandleCommand(std::move(cmd));
 
@@ -44,6 +46,8 @@ void Controller::RevealRequested(Index r, Index c)
 
 void Controller::FlagRequested(Index r, Index c)
 {
+    if (model.CurrentState() == EState::READY) timer.start();
+
     auto cmd = std::make_unique<FlagCommand>(r, c);
     auto success = HandleCommand(std::move(cmd));
 

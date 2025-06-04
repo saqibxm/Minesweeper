@@ -14,7 +14,7 @@ namespace mines
         static_assert(std::is_integral_v<Type>, "Type must be integral");
 
     public:
-        NumberGenerator() = default;
+        NumberGenerator();
         NumberGenerator(Type lo, Type hi);
         
         void Range(Type lo, Type hi);
@@ -30,15 +30,16 @@ namespace mines
         decltype(eng)& UnderlyingEngine() { return eng; }
     };
 
+    template<typename T>
+    NumberGenerator<T>::NumberGenerator() : NumberGenerator(0, 100)
+    {
+    }
+
     template <typename T>
     NumberGenerator<T>::NumberGenerator(Type lo, Type hi)
     : dist(lo, hi)
     {
-        if constexpr (debug)
-        {
-            Seed(std::random_device{}());
-        }
-        else Seed(777);
+        Seed(debug ? 777 : std::random_device{}());
     }
 
     template <typename T>

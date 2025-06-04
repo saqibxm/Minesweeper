@@ -7,6 +7,7 @@
 #include "Controller.hpp"
 
 using namespace mines;
+using namespace std::string_literals;
 
 Graphics::Graphics(Controller &ctrl)
     : context(ctrl), smiley(texman), flagCounter(texman), timeCounter(texman)
@@ -129,7 +130,9 @@ void Graphics::Display()
             + "\ntexture: " + tiles[row][col].tex
         );
     }
-    else debugInfo.setString("out of range");
+    else debugInfo.setString("out of range"s
+        + "\nX: " + std::to_string(x)
+        + "\nY: " + std::to_string(y));
 
     window.draw(debugInfo);
 #endif /* NDEBUG */

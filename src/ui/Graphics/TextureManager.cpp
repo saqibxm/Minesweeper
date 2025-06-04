@@ -34,7 +34,7 @@ bool TextureManager::Open(std::string_view name, fs::path filename)
     sf::Texture texture;
     if(!texture.loadFromFile(filename)) return false;
 
-    if(textures.find(filename) != textures.end()) return true;
+    if(textures.find(filename.string()) != textures.end()) return true;
 
     textures.emplace(name, texture);
 

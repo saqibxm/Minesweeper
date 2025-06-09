@@ -28,10 +28,10 @@ namespace mines
 
         // explicit operator bool() const noexcept { return mine_; }
 
-        bool mine_ : 1;
-        bool flag_ : 1;
-        State state_ : 2 = HIDDEN;
-        short proximity_ : 4;
+        bool mine_;
+        bool flag_;
+        short proximity_;
+        State state_ = HIDDEN;
     };
 }
 

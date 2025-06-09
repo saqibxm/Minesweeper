@@ -23,9 +23,9 @@ namespace mines
         using RevealCallback = std::function<void(Index, Index)>;
 
         Field() = default;
-        Field(Index n_rows, Index n_cols, unsigned n_mines);
+        Field(Index n_rows, Index n_cols, Index n_mines);
 
-        void Initialize(Index n_rows, Index n_cols, unsigned n_mines = 10);
+        void Initialize(Index n_rows, Index n_cols, Index n_mines = 10);
         void PlaceMines(); // fill the board with mines at random places
 
         void RevealSingle(Index row, Index col); // helper

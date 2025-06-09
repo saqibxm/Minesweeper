@@ -13,7 +13,7 @@ using namespace mines;
 NumberGenerator<Index> Field::generator;
 // watch out for static order initilization fiasco
 
-Field::Field(Index n_rows, Index n_cols, unsigned n_mines)
+Field::Field(Index n_rows, Index n_cols, Index n_mines)
     : total_mines(n_mines), rows(n_rows), cols(n_cols)
     , board(rows, Grid::value_type(cols))
 {
@@ -21,7 +21,7 @@ Field::Field(Index n_rows, Index n_cols, unsigned n_mines)
     PlaceMines();
 }
 
-void Field::Initialize(Index n_rows, Index n_cols, unsigned n_mines)
+void Field::Initialize(Index n_rows, Index n_cols, Index n_mines)
 {
     rows = n_rows;
     cols = n_cols;

@@ -4,11 +4,14 @@
 
 int main()
 {
-    mines::Game game(12, 12, 15);
+    mines::Game game;
     mines::Controller ctrl(game);
     mines::Graphics view(ctrl);
 
-    game.Attach(&view);
+    auto diff = view.SelectDifficulty();
+    ctrl.NewGameRequested(diff);
+
+    game.Attach(&view); // order matters because attaching unconditionally broadcasts config
 
     while(!view.ShouldClose())
     {

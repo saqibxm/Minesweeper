@@ -2,7 +2,7 @@
 #include "Graphics/LayoutConfig.hpp"
 
 using namespace mines;
-using namespace mines::DisplayConfig;
+using namespace mines::LayoutConfig;
 
 Tile::Tile(sf::Texture *init)
     : tile()
@@ -57,7 +57,7 @@ Tile& Tile::UpdateSize(float w, float h)
     return *this;
 }
 sf::Vector2f Tile::RetrieveSize() const {
-    return {DisplayConfig::TileWidth, DisplayConfig::TileHeight};
+    return {LayoutConfig::TileWidth, LayoutConfig::TileHeight};
 }
 sf::Rect<float> Tile::BoundingPos() const {
     return tile.getGlobalBounds();

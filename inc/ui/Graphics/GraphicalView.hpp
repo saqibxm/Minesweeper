@@ -59,7 +59,6 @@ namespace mines
         void RefreshTexture(Index r, Index c, const Cell&);
         Tile* TileAt(float x, float y);
         std::optional<UPair<Index>> CalculateCellCoord(float x, float y) const;
-        // void PublishCommand(std::unique_ptr<ICommand>); // wrapper to do additional work depending on the command
     
 #ifndef NDEBUG
     sf::Text debugInfo{font};

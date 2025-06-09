@@ -30,11 +30,12 @@ class Game final : public ISubject, public Field // Field is not a dynamic class
     friend class GameOverState;
 
 public:
-    Game(std::size_t w, std::size_t h, std::size_t m);
+    Game(); // defer initialization
     Game(const DifficultyConfig&);
+    Game(std::size_t w, std::size_t h, std::size_t m);
     ~Game();
 
-    void NewGame(const DifficultyConfig&);
+    void NewGame(const DifficultyConfig&); // akin to initialize
     void NewGame(std::size_t w, std::size_t h, std::size_t m);
 
     void Reveal(Index r, Index c);

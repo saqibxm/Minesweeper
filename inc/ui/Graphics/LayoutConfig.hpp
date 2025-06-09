@@ -8,7 +8,7 @@
 
 namespace mines
 {
-    namespace DisplayConfig
+    namespace LayoutConfig
     {
         constexpr inline unsigned TileWidth = 32; // pixels
         constexpr inline unsigned TileHeight = 32; // pixels

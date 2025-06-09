@@ -77,6 +77,8 @@ set(
         src/ui/Graphics/Tile.cpp
         src/ui/Graphics/Smiley.cpp
         src/ui/Graphics/Counter.cpp
+        src/ui/Graphics/DifficultySelector.cpp
+        inc/ui/Graphics/DifficultySelector.hpp
         #src/ui/Graphics/Block.cpp
 
         #src/ui/Console/ConsoleView.cpp

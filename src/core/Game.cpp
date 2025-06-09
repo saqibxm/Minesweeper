@@ -2,6 +2,16 @@
 
 using namespace mines;
 
+Game::Game() : config()
+{
+    TransitionTo<ReadyState>();
+}
+
+Game::Game(const DifficultyConfig &cfg)
+{
+    NewGame(config);
+}
+
 Game::Game(std::size_t rows, std::size_t cols, std::size_t mines)
     : gameState(nullptr), config(Difficulty::CUSTOM, rows, cols, mines)
 {
@@ -18,13 +28,13 @@ Game::~Game()
 
 void Game::NewGame(const DifficultyConfig &dc)
 {
+    gameState->NewGame(dc);
+    TransitionTo<ReadyState>();
     if (config != dc)
     {
         config = dc;
         BroadcastConfigChange();
     }
-    gameState->NewGame(dc);
-    TransitionTo<ReadyState>();
     Notify();
 }
 

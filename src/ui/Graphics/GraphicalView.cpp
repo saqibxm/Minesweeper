@@ -5,16 +5,16 @@
 #include "Graphics/GraphicalView.hpp"
 #include "Graphics/LayoutConfig.hpp"
 #include "Controller.hpp"
+#include "Graphics/DifficultySelector.hpp"
 
 using namespace mines;
 using namespace std::string_literals;
+using namespace LayoutConfig;
 
 Graphics::Graphics(Controller &ctrl)
     : context(ctrl), smiley(texman), flagCounter(texman), timeCounter(texman)
 {
-    using namespace DisplayConfig;
-
-    auto [rows, cols] = context.ModelSize();
+    using namespace LayoutConfig;
 
     smiley.OnClick([this] { context.NewGameRequested(); });
     
@@ -28,7 +28,7 @@ Graphics::Graphics(Controller &ctrl)
     message.setCharacterSize(14);
     message.setString("Minesweeper");
 
-    data.setString("Data");
+
     data.setFillColor(sf::Color::White);
     data.setCharacterSize(12);
 
@@ -36,7 +36,6 @@ Graphics::Graphics(Controller &ctrl)
     timeCounter.UpdateSize(30, 50);
 
 #ifndef NDEBUG
-    debugInfo.setPosition(sf::Vector2f(10.f, TileHeight * rows + HeaderHeight));
     debugInfo.setFillColor(sf::Color::Cyan);
     debugInfo.setOutlineColor(sf::Color::Black);
     debugInfo.setOutlineThickness(0.5f);
@@ -47,7 +46,12 @@ Graphics::Graphics(Controller &ctrl)
 
 void Graphics::Reset(const DifficultyConfig &cfg)
 {
-    using namespace DisplayConfig;
+    auto [rows, cols] = context.ModelSize();
+#ifndef NDEBUG
+    debugInfo.setPosition(sf::Vector2f(10.f, TileHeight * rows + HeaderHeight));
+#endif
+
+    data.setString("Data");
 
     auto [windowWidth, windowHeight] = window.getSize();
     auto [smileyWidth, smileyHeight] = smiley.RetrieveSize();
@@ -65,7 +69,8 @@ void Graphics::Reset(const DifficultyConfig &cfg)
 
 DifficultyConfig Graphics::SelectDifficulty()
 {
-    return {/* NOT IMPLEMENTED */};
+    static impl::DifficultySelector selector(font);
+    return selector.PromptSelection();
 }
 
 void Graphics::ShowMessage(const std::string &msg)
@@ -110,10 +115,10 @@ void Graphics::Display()
 #ifndef NDEBUG
     auto [x, y] = sf::Mouse::getPosition(window);
 
-    auto [w, h] = std::make_pair(DisplayConfig::TileWidth, DisplayConfig::TileHeight);
+    auto [w, h] = std::make_pair(LayoutConfig::TileWidth, LayoutConfig::TileHeight);
 
     // info_debug.setPosition({x+20.0f, y+20.0f});
-    debugInfo.setString("row: " + std::to_string(y/DisplayConfig::TileWidth) + "\ncol: " + std::to_string(x/DisplayConfig::TileHeight));
+    debugInfo.setString("row: " + std::to_string(y/LayoutConfig::TileWidth) + "\ncol: " + std::to_string(x/LayoutConfig::TileHeight));
 
     auto coords = CalculateCellCoord(x, y);
 
@@ -177,7 +182,7 @@ void Graphics::Update(const BoardSnapshot &snap)
 
     for(decltype(tiles)::size_type ic = 0, ie = tiles.size(); ic < ie; ++ic)
     {
-        for(decltype(tiles)::value_type::size_type jc = 0, je = tiles.size(); jc < je; ++jc)
+        for(decltype(tiles)::value_type::size_type jc = 0, je = tiles[ic].size(); jc < je; ++jc)
             RefreshTexture(ic, jc, snap.cells[ic][jc]);
     }
 
@@ -211,7 +216,7 @@ void Graphics::TimeReceived(double seconds)
 
 void Graphics::ConfigUpdate(const DifficultyConfig &config)
 {
-    window.create(DisplayConfig::ComputeVideoMode({config.rows, config.cols}), DisplayConfig::Title, sf::Style::Close);
+    window.create(LayoutConfig::ComputeVideoMode({config.rows, config.cols}), LayoutConfig::Title, sf::Style::Close);
 
     const auto &cfg = config;
     tiles.clear();
@@ -225,7 +230,7 @@ void Graphics::ConfigUpdate(const DifficultyConfig &config)
         for(decltype(cfg.cols) j = 0; j < cfg.cols; ++j)
         {
             vec.emplace_back(texman.PlaceholderPtr())
-                .UpdatePosition(DisplayConfig::TileWidth * j, (DisplayConfig::TileHeight * i) + DisplayConfig::HeaderHeight);
+                .UpdatePosition(LayoutConfig::TileWidth * j, (LayoutConfig::TileHeight * i) + LayoutConfig::HeaderHeight);
             // RefreshTexture(i, j); // segfault, for obvious reasons
         }
         tiles.push_back(std::move(vec));
@@ -336,7 +341,7 @@ std::optional<UPair<Index>> Graphics::CalculateCellCoord(float x, float y) const
 {
     auto [fx, fy] = tiles.front().front().RetrievePosition();
     auto [lx, ly] = tiles.back().back().RetrievePosition();
-    auto [w, h] = std::make_pair(DisplayConfig::TileWidth, DisplayConfig::TileHeight);
+    auto [w, h] = std::make_pair(LayoutConfig::TileWidth, LayoutConfig::TileHeight);
     
     if((x >= fx && x < lx + w) && (y >= fy && y < ly + h))
     {

@@ -7,7 +7,7 @@ namespace mines
 {
     struct Cell
     {
-        enum State { HIDDEN, CLEARED, FLAGGED, UNDETERMINATE};
+        enum State : std::uint8_t { HIDDEN, CLEARED, FLAGGED, UNDETERMINATE};
 
         explicit Cell(bool is_mine = false);
 
@@ -28,11 +28,18 @@ namespace mines
 
         // explicit operator bool() const noexcept { return mine_; }
 
-        bool mine_;
-        bool flag_;
-        short proximity_;
-        State state_ = HIDDEN;
+        bool mine_ : 1;
+        bool flag_ : 1;
+        State state_ : 2 = HIDDEN;
+        short proximity_ : 4;
     };
 }
+
+/* EXPERIMENTAL
+bool mine_ : 1;
+bool flag_ : 1;
+std::uint8_t proximity_ : 4;
+State state_ : 2 = HIDDEN;
+*/
 
 #endif /* CELL_HPP */

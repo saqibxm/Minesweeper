@@ -39,6 +39,8 @@ set(
         ./common.h
         ./utility.h
         ./stopwatch.h
+        ./Minesweeper.cpp
+        ./Minesweeper.hpp
 
         inc/base/Subject.hpp
         inc/base/Observer.hpp

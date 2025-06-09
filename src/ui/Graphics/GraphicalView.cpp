@@ -26,8 +26,6 @@ Graphics::Graphics(Controller &ctrl)
 
     message.setFillColor(sf::Color::White);
     message.setCharacterSize(14);
-    message.setString("Minesweeper");
-
 
     data.setFillColor(sf::Color::White);
     data.setCharacterSize(12);
@@ -51,6 +49,7 @@ void Graphics::Reset(const DifficultyConfig &cfg)
     debugInfo.setPosition(sf::Vector2f(10.f, TileHeight * rows + HeaderHeight));
 #endif
 
+    message.setString("Minesweeper");
     data.setString("Data");
 
     auto [windowWidth, windowHeight] = window.getSize();

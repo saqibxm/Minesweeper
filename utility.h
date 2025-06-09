@@ -73,9 +73,11 @@ namespace mines
             return cfg;
         }
 
-        Difficulty level;
-        std::size_t rows, cols;
-        unsigned mines;
+        explicit operator bool() const noexcept { return *this != DifficultyConfig(); }
+
+        Difficulty level = Difficulty::CUSTOM;
+        std::size_t rows = 0, cols = 0;
+        unsigned mines = 0;
     };
 
     template <typename T> using UPair = std::pair<T, T>;

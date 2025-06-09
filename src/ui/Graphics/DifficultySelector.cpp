@@ -20,7 +20,7 @@ DifficultyConfig DifficultySelector::PromptSelection()
     std::vector<sf::Text> labels;
 
     if (prompt.isOpen()) prompt.close();
-    prompt.create(sf::VideoMode({240, 240}), "Select Difficulty", sf::Style::Close);
+    prompt.create(sf::VideoMode({240, 250}), "Select Difficulty", sf::Style::Close);
 
     // Predefined difficulty levels for button mapping
     constexpr Difficulty levels[sz] = {
@@ -77,6 +77,7 @@ DifficultyConfig DifficultySelector::PromptSelection()
                             prompt.close();
                             auto [rows, cols, mines] = PromptCustomDifficulty();
                             chosen.emplace(Difficulty::CUSTOM, rows, cols, mines);
+                            if (!chosen.value()) chosen = DifficultyConfig::From(levels[0]);
                         }
                         prompt.close();
                         break;
@@ -108,7 +109,7 @@ std::array<unsigned, 3> DifficultySelector::PromptCustomDifficulty()
     title.setFillColor(sf::Color::White);
 
     std::array<std::string, nfields> labels = {"Rows:", "Cols:", "Mines:"};
-    std::array<std::string, nfields> inputs = {"", "", ""};
+    std::array<std::string, nfields> inputs = {};
     std::vector<sf::Text> inputTexts;
     std::array<sf::RectangleShape, nfields> inputBoxes;
 
@@ -145,7 +146,7 @@ std::array<unsigned, 3> DifficultySelector::PromptCustomDifficulty()
             else if (event->is<sf::Event::TextEntered>())
             {
                 auto e = *event->getIf<sf::Event::TextEntered>();
-                if (std::isdigit(e.unicode) && inputs[currentBox].size() < 5)
+                if (std::isdigit(e.unicode) && inputs[currentBox].size() < 3)
                     inputs[currentBox] += static_cast<char>(e.unicode);
                 else if (e.unicode == '\b' && !inputs[currentBox].empty())
                     inputs[currentBox].pop_back();
@@ -174,8 +175,16 @@ std::array<unsigned, 3> DifficultySelector::PromptCustomDifficulty()
                     if (inputBoxes[i].getGlobalBounds().contains(static_cast<sf::Vector2f>(mbr->position)))
                         currentBox = i;
                 }
-                if (okButton.getGlobalBounds().contains(static_cast<sf::Vector2f>(sf::Mouse::getPosition(inputWindow))))
+                if (okButton.getGlobalBounds().contains(static_cast<sf::Vector2f>(mbr->position)))
+                {
+                    /*
+                    for (int i = 0; i < nfields; ++i)
+                    {
+                        if (inputs[i].empty()) inputs[i] = "0";
+                    } */
                     inputWindow.close();
+                }
+
             }
             for (int i = 0; i < nfields; ++i) inputBoxes[i].setOutlineThickness(0.0f);
             inputBoxes[currentBox].setOutlineThickness(4.0f);
@@ -198,6 +207,15 @@ std::array<unsigned, 3> DifficultySelector::PromptCustomDifficulty()
 
     std::array<unsigned, 3> ret;
     for (std::size_t i = 0; i < std::size(ret); ++i)
-        ret[i] = std::stoi(inputs[i]);
+    {
+        try
+        {
+            ret[i] = std::stoi(inputs[i]);
+        }
+        catch (const std::invalid_argument &e)
+        {
+            ret[i] = 0;
+        }
+    }
     return ret;
 }

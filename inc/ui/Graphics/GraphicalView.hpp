@@ -10,7 +10,6 @@
 #include "Game.hpp"
 #include "Tile.hpp"
 #include "Smiley.hpp"
-#include "Grid.hpp"
 #include "Counter.hpp"
 
 namespace mines

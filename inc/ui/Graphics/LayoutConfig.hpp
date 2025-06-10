@@ -14,6 +14,10 @@ namespace mines
         constexpr inline unsigned TileHeight = 32; // pixels
         [[maybe_unused]] constexpr inline float TileOutline = 1.5f;
 
+        constexpr inline unsigned SmileyWidth = 52, SmileyHeight = 52;
+
+        constexpr inline unsigned CounterWidth = 26, CounterHeight = 50; // subject to change
+
         constexpr inline unsigned HeaderHeight = 100;
         constexpr inline unsigned FooterHeight = debug ? 80 : 0;
 

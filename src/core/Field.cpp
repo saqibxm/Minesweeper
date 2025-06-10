@@ -103,13 +103,14 @@ void Field::RevealCell(Index row, Index col, const RevealCallback &callback)
 
         if constexpr (!debug)
             UpdateProximity(r, c); // after revealing the cell, update its proximity
-        
-        ++cleared; // modify to not increment when the cell was a mine
-        
-        callback(r, c); // run the callback on this index, subject of removal
-        
+
         if(current.mine())
             ShowMinesAndFlags(callback);
+        else
+        {
+            ++cleared; // modify to not increment when the cell was a mine
+            callback(r, c); // run the callback on this index, subject of removal
+        }
 
         // Only continue expansion for cells with zero proximity
         if (current.proximity() != 0 || current.mine()) continue;

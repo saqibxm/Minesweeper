@@ -22,7 +22,7 @@ Graphics::Graphics(Controller &ctrl)
     
     std::ignore = font.openFromFile("assets/Monocraft.ttf"); // TODO: remove hardcodes
 
-    smiley.UpdateSize(64, 64);
+    smiley.UpdateSize(SmileyWidth, SmileyHeight);
 
     message.setFillColor(sf::Color::White);
     message.setCharacterSize(14);
@@ -30,8 +30,8 @@ Graphics::Graphics(Controller &ctrl)
     data.setFillColor(sf::Color::White);
     data.setCharacterSize(12);
 
-    flagCounter.UpdateSize(30, 50);
-    timeCounter.UpdateSize(30, 50);
+    flagCounter.UpdateSize(CounterWidth, CounterHeight);
+    timeCounter.UpdateSize(CounterWidth, CounterHeight);
 
 #ifndef NDEBUG
     debugInfo.setFillColor(sf::Color::Cyan);
@@ -124,7 +124,7 @@ void Graphics::Display()
     if(coords) {
         int row = coords->first;
         int col = coords->second;
-        // const auto &cell = lastSnap.cells->operator()(row, col);
+
         const auto &cell = lastSnap.cells[row][col];
         debugInfo.setString(
             "row: " + std::to_string(row)

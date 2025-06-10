@@ -15,7 +15,8 @@ NumberGenerator<Index> Field::generator;
 
 Field::Field(Index n_rows, Index n_cols, Index n_mines)
     : total_mines(n_mines), rows(n_rows), cols(n_cols)
-    , board(rows, Grid::value_type(cols))
+    , board(rows, cols)
+// board(rows, decltype(board)::value_type(cols))
 {
     generator.Range(0, (rows * cols) - 1);
     PlaceMines();
@@ -30,7 +31,8 @@ void Field::Initialize(Index n_rows, Index n_cols, Index n_mines)
     auto range = std::make_pair(0, (rows * cols) - 1);
     generator.Range(range.first, range.second);
 
-    board.assign(rows, Grid::value_type(cols));
+    board.resize(rows, cols);
+    // board.assign(rows, decltype(board)::value_type(cols));
     PlaceMines();
 
     if constexpr(debug)
@@ -42,15 +44,24 @@ void Field::Initialize(Index n_rows, Index n_cols, Index n_mines)
 
 void Field::PlaceMines()
 {
-    std::ptrdiff_t count;
+    std::ptrdiff_t count = 0;
+    /*
     for(const auto &row : board)
     {
         count = std::count_if(row.begin(), row.end(), [](const Cell &c) {
             return c.mine();
         });
+    }*/
+
+    for (Grid::size_type row = 0; row < rows; ++row)
+    {
+        for (Grid::size_type col = 0; col < cols; ++col)
+            board[row][col].reset();
+            // board(row, col).reset();
     }
 
     assert(count == 0); // board must be clean
+    assert(total_mines < rows * cols); // important
 
     // Fisher-Yates shuffle for O(N) placement
     std::vector<Index> indices(rows * cols);
@@ -78,6 +89,7 @@ void Field::RevealCell(Index row, Index col, const RevealCallback &callback)
         auto [r, c] = candidates.front();
         candidates.pop();
         auto& current = board[r][c];
+        // auto& current = board(row, col);
 
         if (current.revealed()) continue; // if already revealed, skip!
 
@@ -88,8 +100,9 @@ void Field::RevealCell(Index row, Index col, const RevealCallback &callback)
         }
 
         current.reveal(); // finally clear the cell
-        
-        UpdateProximity(r, c); // after revealing the cell, update its proximity
+
+        if constexpr (!debug)
+            UpdateProximity(r, c); // after revealing the cell, update its proximity
         
         ++cleared; // modify to not increment when the cell was a mine
         
@@ -109,10 +122,10 @@ void Field::RevealCell(Index row, Index col, const RevealCallback &callback)
 
                 Index nr = r + dr;
                 Index nc = c + dc;
+
                 if (nr >= rows || nc >= cols) continue;
 
-                auto& neighbor = board[nr][nc];
-                if (!neighbor.revealed())
+                if (!board[nr][nc].revealed())
                     candidates.emplace(nr, nc);
             }
         }
@@ -124,6 +137,7 @@ void Field::FlagCell(Index row, Index col)
     if (row >= board.size() || col >= board[row].size()) return;
 
     auto &cell = board[row][col];
+    // auto &cell = board(row, col);
 
     if(cell.revealed()) return;
 
@@ -141,9 +155,9 @@ void Field::UpdateProximity()
 
     // redundant due to a check already in parameterized variant
 
-    for (std::size_t i = 0; i < board.size(); ++i)
+    for (std::size_t i = 0, r = board.size(); i < r; ++i)
     {
-        for (std::size_t j = 0; j < board[i].size(); ++j)
+        for (std::size_t j = 0, c = board[i].size(); j < c; ++j)
         {
             if (board[i][j].mine())
                 continue;

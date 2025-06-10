@@ -6,66 +6,67 @@
 
 using namespace mines;
 
-Cell::Cell(bool is_mine)
+Cell::Cell(bool is_mine) noexcept(noexcept(Cell::proximity()))
     : mine_(is_mine), flag_{}, proximity_{}
 {
     // mine(is_mine); // call the setter if additional work
 }
 
-bool Cell::mine() const
+bool Cell::mine() const noexcept
 {
     return mine_;
 }
 
-void Cell::mine(bool set)
+void Cell::mine(bool set) noexcept(noexcept(Cell::proximity()))
 {
     mine_ = set;
-    // proximity(-1); // is itself the mine
+    // if (set)
+        // proximity(-1); // is itself the mine
 }
 
-bool Cell::revealed() const
+bool Cell::revealed() const noexcept
 {
     return state_ == CLEARED;
 }
 
-bool Cell::flagged() const
+bool Cell::flagged() const noexcept
 {
     return flag_;
 }
 
-short Cell::proximity() const
+short Cell::proximity() const noexcept
 {
     return proximity_;
 }
 
-bool Cell::proximal() const
+bool Cell::proximal() const noexcept
 {
     return proximity_ != 0;
 }
 
-void Cell::open()
+void Cell::open() noexcept
 {
     state_ = CLEARED;
 }
 
-Cell::State Cell::state() const
+Cell::State Cell::state() const noexcept
 {
     return state_;
 }
 
-void Cell::toggle_flag()
+void Cell::toggle_flag() noexcept
 {
     flag_ = !flag_;
     state_ = state() == FLAGGED ? HIDDEN : FLAGGED;
 }
 
-void Cell::reveal()
+void Cell::reveal() noexcept
 {
     state(CLEARED);
     flag_ = false;
 }
 
-void Cell::state(State s)
+void Cell::state(State s) noexcept
 {
     state_ = s;
 }
@@ -78,4 +79,12 @@ void Cell::proximity(short n)
         throw std::logic_error("proximity is out of valid range of [0 - " + std::to_string(max_neighbouring_mines) + "]\n");
 
     proximity_ = n;
+}
+
+void Cell::reset() noexcept
+{
+    mine_ = false;
+    flag_ = false;
+    proximity_ = 0;
+    state_ = HIDDEN;
 }

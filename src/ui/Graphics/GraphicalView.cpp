@@ -5,7 +5,7 @@
 #include "Graphics/GraphicalView.hpp"
 #include "Graphics/LayoutConfig.hpp"
 #include "Controller.hpp"
-#include "Graphics/DifficultySelector.hpp"
+#include "Graphics/DifficultySelectorDelegate.hpp"
 
 using namespace mines;
 using namespace std::string_literals;
@@ -68,7 +68,7 @@ void Graphics::Reset(const DifficultyConfig &cfg)
 
 DifficultyConfig Graphics::SelectDifficulty()
 {
-    static impl::DifficultySelector selector(font);
+    static impl::DifficultySelectorDelegate selector(font);
     return selector.PromptSelection();
 }
 
@@ -124,6 +124,7 @@ void Graphics::Display()
     if(coords) {
         int row = coords->first;
         int col = coords->second;
+        // const auto &cell = lastSnap.cells->operator()(row, col);
         const auto &cell = lastSnap.cells[row][col];
         debugInfo.setString(
             "row: " + std::to_string(row)
@@ -183,6 +184,7 @@ void Graphics::Update(const BoardSnapshot &snap)
     {
         for(decltype(tiles)::value_type::size_type jc = 0, je = tiles[ic].size(); jc < je; ++jc)
             RefreshTexture(ic, jc, snap.cells[ic][jc]);
+            // RefreshTexture(ic, jc, snap.cells->operator()(ic, jc));
     }
 
     timeCounter.ResetNumber();

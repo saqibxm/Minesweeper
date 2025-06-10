@@ -7,10 +7,10 @@
 
 namespace mines::impl {
 
-class DifficultySelector
+class DifficultySelectorDelegate
 {
 public:
-    DifficultySelector(sf::Font &font_);
+    DifficultySelectorDelegate(sf::Font &font_);
 
     DifficultyConfig PromptSelection();
 

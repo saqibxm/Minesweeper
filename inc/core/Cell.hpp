@@ -9,24 +9,25 @@ namespace mines
     {
         enum State : std::uint8_t { HIDDEN, CLEARED, FLAGGED, UNDETERMINATE};
 
-        explicit Cell(bool is_mine = false);
+        explicit Cell(bool is_mine = false) noexcept(noexcept(proximity()));
 
-        bool mine() const;
-        bool revealed() const;
-        bool flagged() const;
-        bool proximal() const;
-        short proximity() const;
-        State state() const;
+        bool mine() const noexcept;
+        bool revealed() const noexcept;
+        bool flagged() const noexcept;
+        bool proximal() const noexcept;
+        short proximity() const noexcept;
+        State state() const noexcept;
         
-        void toggle_flag();
-        void mine(bool set);
-        void reveal();
-        void state(State state);
+        void toggle_flag() noexcept;
+        void mine(bool set) noexcept(noexcept(proximity()));
+        void reveal() noexcept;
+        void state(State state) noexcept;
         void proximity(short n);
 
-        void open(); // clear the cell
+        void open() noexcept; // clear the cell
 
         // explicit operator bool() const noexcept { return mine_; }
+        void reset() noexcept;
 
         bool mine_;
         bool flag_;

@@ -10,6 +10,7 @@
 #include "Cell.hpp"
 #include "common.h"
 #include "utility.h"
+#include "FlatVector.hpp"
 #include "NumberGenerator.hpp"
 
 namespace mines
@@ -19,7 +20,8 @@ namespace mines
         unsigned rows = 0, cols = 0;
     
     public:
-        using Grid = std::vector<std::vector<Cell>>;
+        // using Grid = std::vector<std::vector<Cell>>;
+        using Grid = FlatVector<Cell>;
         using RevealCallback = std::function<void(Index, Index)>;
 
         Field() = default;
@@ -28,7 +30,7 @@ namespace mines
         void Initialize(Index n_rows, Index n_cols, Index n_mines = 10);
         void PlaceMines(); // fill the board with mines at random places
 
-        void RevealSingle(Index row, Index col); // helper
+        // void RevealSingle(Index row, Index col); // helper
         void RevealCell(Index row, Index col, const RevealCallback &cb = [](Index, Index) -> void { /* Do Nothing by default! */ });
         void FlagCell(Index row, Index col);
         void UpdateProximity(); // of all cells
@@ -39,8 +41,8 @@ namespace mines
         unsigned MineCount() const { return total_mines; }
         UPair<unsigned> Dimensions() const { return {rows, cols}; }
         
-        Cell& CellAt(Index r, Index c) { return board.at(r).at(c); }
-        const Cell& CellAt(Index r, Index c) const { return board.at(r).at(c); }
+        Cell& CellAt(Index r, Index c) { return board[r][c]; /* board(r, c); */ }
+        const Cell& CellAt(Index r, Index c) const { return board[r][c]; /* board(r, c); */ }
         Grid& Board() { return board; }
         Cell& operator[](Index);
         const Cell& operator[](Index) const;

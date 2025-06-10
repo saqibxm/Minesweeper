@@ -23,7 +23,7 @@ public:
 
     void UpdateSize(float w, float h);
     void UpdatePosition(float x, float y);
-    sf::Vector2f RetrievePosition() const;
+    const sf::Vector2f& RetrievePosition() const;
     sf::Vector2f RetrieveSize() const;
 
     Counter& operator++();

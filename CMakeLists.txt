@@ -79,20 +79,23 @@ set(
         src/ui/Graphics/Tile.cpp
         src/ui/Graphics/Smiley.cpp
         src/ui/Graphics/Counter.cpp
-        src/ui/Graphics/DifficultySelector.cpp
-        inc/ui/Graphics/DifficultySelector.hpp
+        src/ui/Graphics/DifficultySelectorDelegate.cpp
+        inc/ui/Graphics/DifficultySelectorDelegate.hpp
         #src/ui/Graphics/Block.cpp
 
         #src/ui/Console/ConsoleView.cpp
 )
 
+message("Build Type ${CMAKE_BUILD_TYPE}")
 
 # Add the executable
 add_executable(Minesweeper ${SOURCES})
 
-if(${CMAKE_BUILD_TYPE} EQUAL "DEBUG")
-    target_compile_options(Minesweeper PRIVATE "-fno-access-control")
-endif(${CMAKE_BUILD_TYPE} EQUAL "DEBUG")
+if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+    # target_compile_options(Minesweeper PRIVATE "-fno-access-control")
+    add_compile_options(-fsanitize=address,undefined)
+    add_link_options(-fsanitize=address,undefined)
+endif(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 
 # Link with SFML
 target_link_libraries(Minesweeper PRIVATE SFML::Graphics)

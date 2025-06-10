@@ -21,6 +21,7 @@ struct BoardSnapshot
     };
     DifficultyConfig lvl;
     Field::Grid cells;
+    // const Field::Grid *cells;
 };
 
 class Game final : public ISubject, public Field // Field is not a dynamic class

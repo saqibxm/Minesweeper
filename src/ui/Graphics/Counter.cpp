@@ -44,7 +44,7 @@ sf::Vector2f Counter::RetrieveSize() const
 }
 
 
-sf::Vector2f Counter::RetrievePosition() const
+const sf::Vector2f& Counter::RetrievePosition() const
 {
     return position;
 }

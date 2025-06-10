@@ -3,17 +3,17 @@
 #include <cctype>
 #include <optional>
 
-#include "Graphics/DifficultySelector.hpp"
+#include "Graphics/DifficultySelectorDelegate.hpp"
 
 using namespace mines;
 using namespace mines::impl;
 
-DifficultySelector::DifficultySelector(sf::Font &font_) : font(font_)
+DifficultySelectorDelegate::DifficultySelectorDelegate(sf::Font &font_) : font(font_)
 {
 }
 
 
-DifficultyConfig DifficultySelector::PromptSelection()
+DifficultyConfig DifficultySelectorDelegate::PromptSelection()
 {
     constexpr std::size_t sz = 4;
     sf::RectangleShape buttons[sz];
@@ -98,7 +98,7 @@ DifficultyConfig DifficultySelector::PromptSelection()
 }
 
 
-std::array<unsigned, 3> DifficultySelector::PromptCustomDifficulty()
+std::array<unsigned, 3> DifficultySelectorDelegate::PromptCustomDifficulty()
 {
     constexpr unsigned nfields = 3;
     sf::RenderWindow &inputWindow = prompt;

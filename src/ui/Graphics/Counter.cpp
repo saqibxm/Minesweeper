@@ -8,6 +8,7 @@ using namespace mines;
 
 Counter::Counter(TextureManager &texman, int val)
     : manager(texman), digits()
+    , left(manager.Placeholder()), frame(manager.Placeholder()), right(manager.Placeholder())
 {
     for (decltype(digits)::size_type i = 0; i < digits.size(); ++i)
     {
@@ -16,24 +17,35 @@ Counter::Counter(TextureManager &texman, int val)
         .UpdatePosition(0 + i*25, 10)
         .UpdateTexture(manager.FetchPtr("counter0"));
     }
+
+    left.setTexture(manager.Fetch("counterleft"), true);
+    frame.setTexture(manager.Fetch("countermiddle"), true);
+    right.setTexture(manager.Fetch("counterright"), true);
 }
 
 void Counter::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
     for (auto rit = digits.rbegin(); rit != digits.rend(); ++rit)
         rit->draw(target, states);
+
+    target.draw(left, states);
+    // target.draw(frame, states);
+    target.draw(right, states);
 }
 
 void Counter::UpdatePosition(float x, float y)
 {
-    position.x = x;
-    position.y = y;
+    position = {x, y};
 
     for (decltype(digits)::size_type i = 0; i < digits.size(); ++i)
     {
         auto [width, height] = digits[i].RetrieveSize();
         digits[i].UpdatePosition(x + i * width, y);
     }
+
+    left.setPosition(position);
+    right.setPosition({position.x + size.x * digits.size(), position.y});
+    frame.setOrigin(position + (RetrieveSize().componentWiseDiv({2.0f, 2.0f})));
 }
 
 sf::Vector2f Counter::RetrieveSize() const
@@ -60,6 +72,14 @@ void Counter::UpdateSize(float w, float h)
         digits[i].UpdateSize(w, h);
     }
     UpdatePosition(position.x, position.y);
+
+    const auto &leftBorder = manager.Fetch("counterleft");
+    const auto &frameBorder = manager.Fetch("countermiddle");
+    const auto &rightBorder = manager.Fetch("counterright");
+
+    left.setScale({ 1.0f, h / leftBorder.getSize().y});
+    right.setScale({ 1.0f, h / rightBorder.getSize().y});
+    frame.setScale({ w / frameBorder.getSize().x, h / frameBorder.getSize().y});
 }
 
 

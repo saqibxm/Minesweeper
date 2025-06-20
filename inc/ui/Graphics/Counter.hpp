@@ -34,6 +34,8 @@ private:
     TextureManager &manager;
     int value;
 
+    sf::Sprite left, frame, right;
+
     sf::Vector2f position, size;
 
     void UpdateAllFaces();

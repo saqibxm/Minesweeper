@@ -211,9 +211,8 @@ void Graphics::CountersReceived(unsigned revealCount, unsigned flagCount)
 
 void Graphics::TimeReceived(double seconds)
 {
-    timeCounter.SetNumber(seconds);
+    timeCounter.SetNumber(seconds + 1);
 }
-
 
 void Graphics::ConfigUpdate(const DifficultyConfig &config)
 {

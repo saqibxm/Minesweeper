@@ -20,14 +20,53 @@ include_directories(inc/
 
 # Make SFML available
 include(FetchContent)
-FetchContent_Declare(SFML
-    GIT_REPOSITORY https://github.com/SFML/SFML.git
-    GIT_TAG 3.0.x
-    GIT_PROGRESS TRUE
-    GIT_SHALLOW ON
-    EXCLUDE_FROM_ALL
-    SYSTEM)
-FetchContent_MakeAvailable(SFML)
+# Turn on verbose
+set(FETCHCONTENT_QUIET OFF)
+
+# Find Git executable
+find_package(Git QUIET)
+if(NOT Git_FOUND)
+    message(FATAL_ERROR "Git not found! Required for SFML download.")
+endif()
+
+# Set SFML source path
+set(SFML_SOURCE_DIR "${CMAKE_BINARY_DIR}/_deps/sfml-src")
+
+# Only clone if not already exists
+if(NOT EXISTS "${SFML_SOURCE_DIR}/CMakeLists.txt")
+    # Shallow clone main repository (depth=1)
+    execute_process(
+            COMMAND ${GIT_EXECUTABLE} clone --depth 1 --branch 3.0.x https://github.com/SFML/SFML.git ${SFML_SOURCE_DIR}
+            RESULT_VARIABLE clone_result
+    )
+
+    # Shallow clone submodules
+    if(clone_result EQUAL "0")
+        execute_process(
+                COMMAND ${GIT_EXECUTABLE} submodule update --init --depth 1
+                WORKING_DIRECTORY ${SFML_SOURCE_DIR}
+                RESULT_VARIABLE submodule_result
+        )
+    endif()
+
+    # Verify clone success
+    if(NOT clone_result EQUAL "0" OR NOT submodule_result EQUAL "0")
+        message(FATAL_ERROR "Failed to clone SFML: Main:${clone_result} Submodules:${submodule_result}")
+    endif()
+endif()
+
+# Configure SFML build
+set(SFML_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(SFML_BUILD_DOC OFF CACHE BOOL "" FORCE)
+set(SFML_INSTALL OFF CACHE BOOL "" FORCE)
+
+# Add to project
+add_subdirectory(
+        ${SFML_SOURCE_DIR}
+        ${CMAKE_BINARY_DIR}/_deps/sfml-build
+        EXCLUDE_FROM_ALL
+        SYSTEM
+)
 
 include_directories(${SFML_INCLUDE})
 

@@ -3,6 +3,8 @@
 #define interface struct
 
 #define ABSTRACT 0
+#include <cstdint>
+
 
 constexpr inline bool debug =
 #ifdef NDEBUG
@@ -16,5 +18,5 @@ constexpr inline bool debug =
 
 namespace mines
 {
-    using Index = std::size_t;
+    using Index = std::uint_fast16_t;
 }

@@ -3,9 +3,7 @@
 #include <array>
 #include <SFML/Graphics/Drawable.hpp>
 
-#include "common.h"
 #include "TextureManager.hpp"
-#include "Tile.hpp"
 
 namespace mines {
 
@@ -30,7 +28,7 @@ public:
     Counter& operator--();
 
 private:
-    std::array<Tile, 3> digits;
+    std::array<sf::RectangleShape, 3> digits;
     TextureManager &manager;
     int value;
 

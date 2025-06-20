@@ -12,10 +12,7 @@ Counter::Counter(TextureManager &texman, int val)
 {
     for (decltype(digits)::size_type i = 0; i < digits.size(); ++i)
     {
-        digits[i]
-            .UpdateSize(25, 50)
-        .UpdatePosition(0 + i*25, 10)
-        .UpdateTexture(manager.FetchPtr("counter0"));
+        digits[i].setTexture(manager.FetchPtr("counter0"));
     }
 
     left.setTexture(manager.Fetch("counterleft"), true);
@@ -26,7 +23,7 @@ Counter::Counter(TextureManager &texman, int val)
 void Counter::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
     for (auto rit = digits.rbegin(); rit != digits.rend(); ++rit)
-        rit->draw(target, states);
+        target.draw(*rit, states);
 
     target.draw(left, states);
     // target.draw(frame, states);
@@ -39,8 +36,8 @@ void Counter::UpdatePosition(float x, float y)
 
     for (decltype(digits)::size_type i = 0; i < digits.size(); ++i)
     {
-        auto [width, height] = digits[i].RetrieveSize();
-        digits[i].UpdatePosition(x + i * width, y);
+        auto [width, height] = digits[i].getSize();
+        digits[i].setPosition({x + (i * width), y});
     }
 
     left.setPosition(position);
@@ -69,13 +66,13 @@ void Counter::UpdateSize(float w, float h)
     //  A check to ensure a certain ratio
     for (decltype(digits)::size_type i = 0; i < digits.size(); ++i)
     {
-        digits[i].UpdateSize(w, h);
+        digits[i].setSize(size);
     }
     UpdatePosition(position.x, position.y);
 
-    const auto &leftBorder = manager.Fetch("counterleft");
-    const auto &frameBorder = manager.Fetch("countermiddle");
-    const auto &rightBorder = manager.Fetch("counterright");
+    const auto &leftBorder = left.getTexture();
+    const auto &frameBorder = frame.getTexture();
+    const auto &rightBorder = right.getTexture();
 
     left.setScale({ 1.0f, h / leftBorder.getSize().y});
     right.setScale({ 1.0f, h / rightBorder.getSize().y});
@@ -141,5 +138,5 @@ void Counter::UpdateFace(std::size_t index, Face face)
         { NINE, '9' }
     };
 
-    digits[index].UpdateTexture(manager.FetchPtr(std::string(prefix) + texmap.at(face)));
+    digits[index].setTexture(manager.FetchPtr(std::string(prefix) + texmap.at(face)));
 }

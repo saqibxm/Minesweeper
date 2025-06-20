@@ -230,7 +230,8 @@ void Graphics::ConfigUpdate(const DifficultyConfig &config)
         for(decltype(cfg.cols) j = 0; j < cfg.cols; ++j)
         {
             vec.emplace_back(texman.PlaceholderPtr())
-                .UpdatePosition(LayoutConfig::TileWidth * j, (LayoutConfig::TileHeight * i) + LayoutConfig::HeaderHeight);
+                .UpdatePosition(LayoutConfig::TileWidth * j, (LayoutConfig::TileHeight * i) + LayoutConfig::HeaderHeight)
+            .UpdateSize(TileWidth, TileHeight);
             // RefreshTexture(i, j); // segfault, for obvious reasons
         }
         tiles.push_back(std::move(vec));

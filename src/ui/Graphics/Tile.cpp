@@ -8,7 +8,7 @@ Tile::Tile(sf::Texture *init)
     : tile()
 {
     UpdateTexture(init);
-    UpdateSize(TileWidth, TileHeight);
+    // UpdateSize(TileWidth, TileHeight);
 }
         
 void Tile::draw(sf::RenderTarget& target, sf::RenderStates state) const {

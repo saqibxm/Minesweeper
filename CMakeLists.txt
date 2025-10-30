@@ -11,10 +11,10 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Set include directories
-include_directories(inc/
-    inc/ui/
-    inc/core/
-    inc/base/
+include_directories(source/
+    source/ui/
+    source/core/
+    source/base/
     ${CMAKE_SOURCE_DIR}
 )
 
@@ -30,7 +30,7 @@ if(NOT Git_FOUND)
 endif()
 
 # Set SFML source path
-set(SFML_SOURCE_DIR "${CMAKE_BINARY_DIR}/_deps/sfml-src")
+set(SFML_SOURCE_DIR "${CMAKE_BINARY_DIR}/_deps/sfml-source")
 
 # Only clone if not already exists
 if(NOT EXISTS "${SFML_SOURCE_DIR}/CMakeLists.txt")
@@ -81,48 +81,48 @@ set(
         ./Minesweeper.cpp
         ./Minesweeper.hpp
 
-        inc/base/Subject.hpp
-        inc/base/Observer.hpp
-        inc/base/Command.hpp
-        inc/base/State.hpp
-        inc/base/NumberGenerator.hpp
+        source/base/Subject.hpp
+        source/base/Observer.hpp
+        source/base/Command.hpp
+        source/base/State.hpp
+        source/base/NumberGenerator.hpp
 
-        inc/core/Cell.hpp
-        inc/core/Controller.hpp
-        inc/core/Field.hpp
-        inc/core/Game.hpp
+        source/core/Cell.hpp
+        source/core/Controller.hpp
+        source/core/Field.hpp
+        source/core/Game.hpp
 
-        inc/ui/View.hpp
-        #inc/ui/Console/ConsoleView.hpp
+        source/ui/View.hpp
+        #source/ui/Console/ConsoleView.hpp
 
-        inc/ui/Graphics/GraphicalView.hpp
-        inc/ui/Graphics/LayoutConfig.hpp
-        inc/ui/PlaceholderTexture.h
-        inc/ui/Graphics/Tile.hpp
-        inc/ui/Graphics/TextureManager.hpp
-        inc/ui/Graphics/Smiley.hpp
-        inc/ui/Graphics/Counter.hpp
-        #inc/ui/Graphics/Block.hpp
+        source/ui/Graphics/GraphicalView.hpp
+        source/ui/Graphics/LayoutConfig.hpp
+        source/ui/PlaceholderTexture.h
+        source/ui/Graphics/Tile.hpp
+        source/ui/Graphics/TextureManager.hpp
+        source/ui/Graphics/Smiley.hpp
+        source/ui/Graphics/Counter.hpp
+        #source/ui/Graphics/Block.hpp
 
-        src/base/Command.cpp
-        src/base/State.cpp
-        src/base/NumberGenerator.cpp
+        source/base/Command.cpp
+        source/base/State.cpp
+        source/base/NumberGenerator.cpp
 
-        src/core/Cell.cpp
-        src/core/Game.cpp
-        src/core/Field.cpp
-        src/core/Controller.cpp
+        source/core/Cell.cpp
+        source/core/Game.cpp
+        source/core/Field.cpp
+        source/core/Controller.cpp
     
-        src/ui/Graphics/GraphicalView.cpp
-        src/ui/Graphics/TextureManager.cpp
-        src/ui/Graphics/Tile.cpp
-        src/ui/Graphics/Smiley.cpp
-        src/ui/Graphics/Counter.cpp
-        src/ui/Graphics/DifficultySelectorDelegate.cpp
-        inc/ui/Graphics/DifficultySelectorDelegate.hpp
-        #src/ui/Graphics/Block.cpp
+        source/ui/Graphics/GraphicalView.cpp
+        source/ui/Graphics/TextureManager.cpp
+        source/ui/Graphics/Tile.cpp
+        source/ui/Graphics/Smiley.cpp
+        source/ui/Graphics/Counter.cpp
+        source/ui/Graphics/DifficultySelectorDelegate.cpp
+        source/ui/Graphics/DifficultySelectorDelegate.hpp
+        #source/ui/Graphics/Block.cpp
 
-        #src/ui/Console/ConsoleView.cpp
+        #source/ui/Console/ConsoleView.cpp
 )
 
 message("Build Type ${CMAKE_BUILD_TYPE}")

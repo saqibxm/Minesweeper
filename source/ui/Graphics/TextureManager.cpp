@@ -1,5 +1,5 @@
 #include "Graphics/TextureManager.hpp"
-#include "../../../inc/ui/PlaceholderTexture.h"
+#include "PlaceholderTexture.h"
 
 using namespace mines;
 

@@ -2,7 +2,7 @@
 #include <exception>
 #include <string>
 
-#include "../../inc/core/Cell.hpp"
+#include "Cell.hpp"
 
 using namespace mines;
 

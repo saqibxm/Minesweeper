@@ -1,7 +1,6 @@
 #pragma once
 
-#ifndef CELL_HPP
-#define CELL_HPP
+#include <cstdint>
 
 namespace mines
 {
@@ -42,5 +41,3 @@ bool flag_ : 1;
 std::uint8_t proximity_ : 4;
 State state_ : 2 = HIDDEN;
 */
-
-#endif /* CELL_HPP */

@@ -40,7 +40,7 @@ namespace mines
         std::vector<std::vector<Tile>> tiles;
 
         Controller &context;
-        TextureManager texman;
+        TextureManager textures;
 
         Smiley smiley; // The smiley face
         Counter flagCounter;

@@ -12,7 +12,7 @@ using namespace std::string_literals;
 using namespace LayoutConfig;
 
 Graphics::Graphics(Controller &ctrl)
-    : context(ctrl), smiley(texman), flagCounter(texman), timeCounter(texman)
+    : context(ctrl), smiley(textures), flagCounter(textures), timeCounter(textures)
 {
     using namespace LayoutConfig;
 
@@ -45,22 +45,24 @@ Graphics::Graphics(Controller &ctrl)
 void Graphics::Reset(const DifficultyConfig &cfg)
 {
     auto [rows, cols] = context.ModelSize();
+    auto [windowWidth, windowHeight] = window.getSize();
+    auto [smileyWidth, smileyHeight] = smiley.RetrieveSize();
+
 #ifndef NDEBUG
     debugInfo.setPosition(sf::Vector2f(10.f, TileHeight * rows + HeaderHeight));
+    data.setPosition(sf::Vector2f(15.0f + (windowWidth / 2.F), 5.0f + (TileHeight * rows + HeaderHeight)));
+#else
+    data.setPosition(sf::Vector2f(10.0f, 30.0F));
 #endif
 
     message.setString("Minesweeper");
     data.setString("Data");
-
-    auto [windowWidth, windowHeight] = window.getSize();
-    auto [smileyWidth, smileyHeight] = smiley.RetrieveSize();
 
     smiley.UpdatePosition((windowWidth / 2) - smileyWidth, (HeaderHeight / 2) - smileyHeight);
     timeCounter.UpdatePosition(windowWidth / 1.5f, (HeaderHeight / 2) - flagCounter.RetrieveSize().y / 2);
     flagCounter.UpdatePosition((windowWidth / 3.0f) - timeCounter.RetrieveSize().x, (HeaderHeight / 2) - flagCounter.RetrieveSize().y / 2);
 
     message.setPosition(sf::Vector2f(10.0f, 10.0f));
-    data.setPosition(sf::Vector2f(10.0f, 30.0f));
 
     mines = cfg.mines;
     flagCounter.SetNumber(mines);
@@ -117,7 +119,7 @@ void Graphics::Display()
     auto [w, h] = std::make_pair(LayoutConfig::TileWidth, LayoutConfig::TileHeight);
 
     // info_debug.setPosition({x+20.0f, y+20.0f});
-    debugInfo.setString("row: " + std::to_string(y/LayoutConfig::TileWidth) + "\ncol: " + std::to_string(x/LayoutConfig::TileHeight));
+    debugInfo.setString("row: " + std::to_string(y/LayoutConfig::TileWidth) + '\n' + "col: " + std::to_string(x/LayoutConfig::TileHeight));
 
     auto coords = CalculateCellCoord(x, y);
 
@@ -203,7 +205,8 @@ void Graphics::CountersReceived(unsigned revealCount, unsigned flagCount)
 {
     data.setString(
         "Revealed : " + std::to_string(revealCount)
-        + "\nFlagged: " + std::to_string(flagCount)
+        + '\n'
+        + "Flagged: " + std::to_string(flagCount)
     );
 
     flagCounter.SetNumber(mines - flagCount);
@@ -229,7 +232,7 @@ void Graphics::ConfigUpdate(const DifficultyConfig &config)
     {
         for(decltype(cfg.cols) j = 0; j < cfg.cols; ++j)
         {
-            vec.emplace_back(texman.PlaceholderPtr())
+            vec.emplace_back(textures.PlaceholderPtr())
                 .UpdatePosition(LayoutConfig::TileWidth * j, (LayoutConfig::TileHeight * i) + LayoutConfig::HeaderHeight)
             .UpdateSize(TileWidth, TileHeight);
             // RefreshTexture(i, j); // segfault, for obvious reasons
@@ -242,14 +245,14 @@ void Graphics::ConfigUpdate(const DifficultyConfig &config)
 
 void Graphics::Won()
 {
-    message.setString("Won!");
+    message.setString("Won");
     smiley.Happy();
 }
 
 void Graphics::Lost(Index r, Index c) // the coordinates of the cell that exploded
 {
-    tiles[r][c].UpdateTexture(texman.FetchPtr("blast"));
-    message.setString("Lost!");
+    tiles[r][c].UpdateTexture(textures.FetchPtr("blast"));
+    message.setString("Lost");
 
     smiley.Kill();
 }
@@ -302,7 +305,7 @@ void Graphics::RefreshTexture(Index row, Index col, const Cell& cell)
     tile.tex = texture;
 #endif // NDEBUG
 
-    tile.UpdateTexture(texman.FetchPtr(texture));
+    tile.UpdateTexture(textures.FetchPtr(texture));
 }
 
 void Graphics::HandleClickReleased(const sf::Event::MouseButtonReleased &mouse)

@@ -25,9 +25,9 @@ void Counter::draw(sf::RenderTarget &target, sf::RenderStates states) const
     for (auto rit = digits.rbegin(); rit != digits.rend(); ++rit)
         target.draw(*rit, states);
 
-    target.draw(left, states);
+    // target.draw(left, states);
     // target.draw(frame, states);
-    target.draw(right, states);
+    // target.draw(right, states);
 }
 
 void Counter::UpdatePosition(float x, float y)

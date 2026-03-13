@@ -42,6 +42,28 @@ void Field::Initialize(Index n_rows, Index n_cols, Index n_mines)
     flagged = 0;
 }
 
+void Field::EnsureSafeFirstClick(Index row, Index col)
+{
+    if (!board[row][col].mine()) return; // Already safe, nothing to do
+
+    // Find any non-mine cell and swap the mine there
+    for (Index i = 0; i < rows; ++i)
+    {
+        for (Index j = 0; j < cols; ++j)
+        {
+            if (i == row && j == col) continue;
+            if (!board[i][j].mine())
+            {
+                board[row][col].mine(false);
+                board[i][j].mine(true);
+                if constexpr (debug)
+                    UpdateProximity(); // Recompute all after mine relocation in debug
+                return;
+            }
+        }
+    }
+}
+
 void Field::PlaceMines()
 {
     std::ptrdiff_t count = 0;

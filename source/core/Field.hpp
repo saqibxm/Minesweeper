@@ -29,6 +29,7 @@ namespace mines
 
         void Initialize(Index n_rows, Index n_cols, Index n_mines = 10);
         void PlaceMines(); // fill the board with mines at random places
+        void EnsureSafeFirstClick(Index row, Index col); // relocate mine if first click is on one
 
         // void RevealSingle(Index row, Index col); // helper
         void RevealCell(Index row, Index col, const RevealCallback &cb = [](Index, Index) -> void { /* Do Nothing by default! */ });

@@ -38,6 +38,12 @@ namespace mines
         unsigned gridRows = 0;
         unsigned gridCols = 0;
 
+        // Cached texture pointers set by Configure() — avoids const_cast in draw()
+        sf::Texture *texTop    = nullptr;
+        sf::Texture *texBottom = nullptr;
+        sf::Texture *texLeft   = nullptr;
+        sf::Texture *texRight  = nullptr;
+
         // Helper: build a RectangleShape that tiles a given texture over a given rect.
         static sf::RectangleShape MakeTiled(sf::Texture &tex,
                                             float x, float y,

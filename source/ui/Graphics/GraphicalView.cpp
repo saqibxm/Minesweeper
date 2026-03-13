@@ -33,6 +33,12 @@ Graphics::Graphics(Controller &ctrl)
     difficultyLabel.setFillColor(sf::Color{200, 200, 200});
     difficultyLabel.setCharacterSize(11);
 
+    replayOverlay.setString("REPLAY");
+    replayOverlay.setCharacterSize(20);
+    replayOverlay.setFillColor(sf::Color{255, 220, 60});
+    replayOverlay.setOutlineColor(sf::Color::Black);
+    replayOverlay.setOutlineThickness(1.5f);
+
     flagCounter.UpdateSize(CounterWidth, CounterHeight);
     timeCounter.UpdateSize(CounterWidth, CounterHeight);
 
@@ -141,6 +147,9 @@ void Graphics::Display()
     window.draw(difficultyLabel);
     window.draw(data);
     window.draw(smiley);
+
+    if (replayMode)
+        window.draw(replayOverlay);
 
 #ifndef NDEBUG
     auto [x, y] = sf::Mouse::getPosition(window);
@@ -374,6 +383,19 @@ void Graphics::HandleKeyPressed(const sf::Event::KeyPressed &key)
         return;
     }
 
+    // R: watch the replay of the last completed game
+    if (key.code == K::R)
+    {
+        const auto &replay = context.LastReplay();
+        if (!replay.Empty())
+        {
+            context.NewGameRequested(currentConfig); // reset to a fresh board
+            smiley.Revive();
+            PlayReplay(replay);
+        }
+        return;
+    }
+
     // 1 / 2 / 3: quick-switch to a preset difficulty (starts a new game)
     if (key.code == K::Num1) { context.NewGameRequested(DifficultyConfig::From(Difficulty::BEGINNER));     smiley.Revive(); return; }
     if (key.code == K::Num2) { context.NewGameRequested(DifficultyConfig::From(Difficulty::INTERMEDIATE)); smiley.Revive(); return; }
@@ -388,7 +410,7 @@ void Graphics::HandleKeyPressed(const sf::Event::KeyPressed &key)
             context.NewGameRequested(cfg);
             smiley.Revive();
         }
-        catch (...) {} // user closed the dialog without choosing
+        catch (...) {} // DifficultySelectorDelegate throws if user closes the window without selecting
     }
 }
 
@@ -411,6 +433,68 @@ void Graphics::RelayoutGrid()
     Reset(currentConfig);
 }
 #endif // NDEBUG
+
+void Graphics::PlayReplay(const Replay &replay)
+{
+    if (replay.Empty()) return;
+
+    replayMode = true;
+
+    // Position the replay badge at the top-right of the header content band
+    {
+        auto lb = replayOverlay.getLocalBounds();
+        auto [winW, winH] = window.getSize();
+        replayOverlay.setPosition(sf::Vector2f{
+            static_cast<float>(winW - BorderRight) - lb.size.x - 6.f,
+            static_cast<float>(BorderTop) + 2.f
+        });
+    }
+
+    using namespace std::chrono;
+    using namespace std::chrono_literals;
+
+    const auto &entries = replay.Entries();
+    double prevTimestamp = 0.0;
+
+    for (const auto &entry : entries)
+    {
+        // Honour recorded timing (clamped to max 2 s between moves)
+        double wait = std::min(entry.timestamp - prevTimestamp, 2.0);
+        prevTimestamp = entry.timestamp;
+
+        bool aborted = false;
+        if (wait > 0.0)
+        {
+            auto deadline = steady_clock::now() + duration<double>(wait);
+            while (steady_clock::now() < deadline)
+            {
+                Display(); // keep rendering while we wait
+                // Allow the user to abort replay by pressing Escape
+                window.handleEvents([this, &aborted](const auto &ev)
+                {
+                    using T = std::decay_t<decltype(ev)>;
+                    if constexpr (std::is_same_v<T, sf::Event::KeyPressed>)
+                        if (ev.code == sf::Keyboard::Key::Escape) { replayMode = false; aborted = true; }
+                    if constexpr (std::is_same_v<T, sf::Event::Closed>)
+                        window.close();
+                });
+                if (!replayMode || !window.isOpen()) { aborted = true; break; }
+            }
+        }
+
+        if (aborted || !window.isOpen()) break;
+
+        // Dispatch the action to the model
+        if (entry.action == ReplayEntry::Action::REVEAL)
+            context.RevealRequested(entry.row, entry.col);
+        else
+            context.FlagRequested(entry.row, entry.col);
+
+        Display(); // show the effect immediately
+    }
+
+    replayMode = false;
+}
 
 void Graphics::HandleClickReleased(const sf::Event::MouseButtonReleased &mouse)
 {

@@ -6,17 +6,19 @@ using namespace LayoutConfig;
 
 Border::Border(TextureManager &mgr) : manager(mgr)
 {
-    // Mark border textures as repeatable so SFML can tile them.
-    manager.Fetch("top").setRepeated(true);
-    manager.Fetch("bottom").setRepeated(true);
-    manager.Fetch("left").setRepeated(true);
-    manager.Fetch("right").setRepeated(true);
+    // Textures are marked as repeatable when Configure() first fetches them.
 }
 
 void Border::Configure(unsigned rows, unsigned cols)
 {
     gridRows = rows;
     gridCols = cols;
+
+    // Cache mutable texture pointers and enable tiling
+    texTop    = &manager.Fetch("top");    texTop->setRepeated(true);
+    texBottom = &manager.Fetch("bottom"); texBottom->setRepeated(true);
+    texLeft   = &manager.Fetch("left");   texLeft->setRepeated(true);
+    texRight  = &manager.Fetch("right");  texRight->setRepeated(true);
 }
 
 sf::RectangleShape Border::MakeTiled(sf::Texture &tex,
@@ -62,44 +64,34 @@ void Border::draw(sf::RenderTarget &target, sf::RenderStates states) const
     target.draw(MakeSprite(manager.Fetch("bottomright"), lW + gW,   botY),    states);
 
     // ─── Top horizontal strip (top border row) ────────────────────────────────
-    {
-        auto &tex = const_cast<Border*>(this)->manager.Fetch("top");
-        target.draw(MakeTiled(tex, lW, 0.f, gW, tH), states);
-    }
+    if (texTop)
+        target.draw(MakeTiled(*texTop, lW, 0.f, gW, tH), states);
 
     // ─── Middle horizontal strip (divider between header and grid) ───────────
+    if (texTop)
     {
-        auto &tex = const_cast<Border*>(this)->manager.Fetch("top");
-        // Scale vertically so it fills the middle divider height
         sf::RectangleShape shape({gW, mH});
         shape.setPosition({lW, midY});
-        shape.setTexture(&tex);
-        // Tile horizontally, stretch vertically by repeating original top texture rect
+        shape.setTexture(texTop);
         shape.setTextureRect({{0, 0}, {static_cast<int>(gW), static_cast<int>(tH)}});
         target.draw(shape, states);
     }
 
     // ─── Bottom horizontal strip ──────────────────────────────────────────────
-    {
-        auto &tex = const_cast<Border*>(this)->manager.Fetch("bottom");
-        target.draw(MakeTiled(tex, lW, botY, gW, bH), states);
-    }
+    if (texBottom)
+        target.draw(MakeTiled(*texBottom, lW, botY, gW, bH), states);
 
     // ─── Left vertical strip (header + grid combined) ────────────────────────
+    if (texLeft)
     {
-        auto &tex = const_cast<Border*>(this)->manager.Fetch("left");
-        // Header content section
-        target.draw(MakeTiled(tex, 0.f, tH, lW, hCH), states);
-        // Grid section
-        target.draw(MakeTiled(tex, 0.f, gridY, lW, gH), states);
+        target.draw(MakeTiled(*texLeft, 0.f, tH, lW, hCH), states);
+        target.draw(MakeTiled(*texLeft, 0.f, gridY, lW, gH), states);
     }
 
     // ─── Right vertical strip ─────────────────────────────────────────────────
+    if (texRight)
     {
-        auto &tex = const_cast<Border*>(this)->manager.Fetch("right");
-        // Header content section
-        target.draw(MakeTiled(tex, lW + gW, tH, rW, hCH), states);
-        // Grid section
-        target.draw(MakeTiled(tex, lW + gW, gridY, rW, gH), states);
+        target.draw(MakeTiled(*texRight, lW + gW, tH, rW, hCH), states);
+        target.draw(MakeTiled(*texRight, lW + gW, gridY, rW, gH), states);
     }
 }

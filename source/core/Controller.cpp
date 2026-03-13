@@ -1,24 +1,13 @@
 #include <cassert>
+#include <filesystem>
 
 #include "Controller.hpp"
 #include "Graphics/GraphicalView.hpp"
 
 using namespace mines;
 
-/*
-Controller::Controller(Game *p_model, bool graphical)
-: model(p_model)
-{
-    view.reset(new Graphics(*model));
-    assert(model && view);
-    
-    model->Attach(view.get());
-}
-*/
-
 Controller::Controller(Game &gameModel) : model(gameModel)
 {
-    // commands.reserve(100);
     timer.reset();
 }
 
@@ -32,7 +21,6 @@ void Controller::Update()
     HandleCommand(std::make_unique<TimerUpdateCommand>(timer.elapsed()));
 }
 
-
 void Controller::RevealRequested(Index r, Index c)
 {
     if (model.CurrentState() == EState::READY) timer.start();
@@ -42,6 +30,9 @@ void Controller::RevealRequested(Index r, Index c)
 
     if (success && !timer.is_running())
         timer.start();
+
+    if (success)
+        currentRecording.Record(ReplayEntry::Action::REVEAL, r, c, timer.elapsed());
 }
 
 void Controller::FlagRequested(Index r, Index c)
@@ -53,10 +44,28 @@ void Controller::FlagRequested(Index r, Index c)
 
     if (success && !timer.is_running())
         timer.start();
+
+    if (success)
+        currentRecording.Record(ReplayEntry::Action::FLAG, r, c, timer.elapsed());
+}
+
+void Controller::SaveAndResetRecording()
+{
+    if (!currentRecording.Empty())
+    {
+        lastReplay = currentRecording;
+        // Auto-save to disk
+        std::filesystem::path dir = Replay::DefaultPath().parent_path();
+        std::filesystem::create_directories(dir);
+        lastReplay.Save(Replay::DefaultPath());
+    }
+    currentRecording.Clear();
 }
 
 void Controller::NewGameRequested(const DifficultyConfig &cfg)
 {
+    SaveAndResetRecording();
+
     auto cmd = std::make_unique<NewCustomGameCommand>(cfg);
     HandleCommand(std::move(cmd));
 
@@ -65,6 +74,8 @@ void Controller::NewGameRequested(const DifficultyConfig &cfg)
 
 void Controller::NewGameRequested()
 {
+    SaveAndResetRecording();
+
     auto cmd = std::make_unique<NewGameCommand>();
     HandleCommand(std::move(cmd));
 
@@ -79,6 +90,5 @@ bool Controller::HandleCommand(std::unique_ptr<ICommand> cmd)
     if (success)
         commands.push(std::move(cmd));
 
-    // commands.top()->Execute(model);
     return success;
 }

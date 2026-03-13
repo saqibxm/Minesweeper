@@ -107,6 +107,7 @@ set(
 
         source/base/Command.cpp
         source/base/State.cpp
+        source/base/Replay.cpp
         source/base/NumberGenerator.cpp
 
         source/core/Cell.cpp

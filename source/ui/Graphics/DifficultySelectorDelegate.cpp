@@ -129,7 +129,13 @@ DifficultyConfig DifficultySelectorDelegate::PromptSelection()
                 if (key == sf::Keyboard::Key::Num1) { chosen = DifficultyConfig::From(Difficulty::BEGINNER);     prompt.close(); }
                 if (key == sf::Keyboard::Key::Num2) { chosen = DifficultyConfig::From(Difficulty::INTERMEDIATE); prompt.close(); }
                 if (key == sf::Keyboard::Key::Num3) { chosen = DifficultyConfig::From(Difficulty::EXPERT);       prompt.close(); }
-                if (key == sf::Keyboard::Key::Num4) { prompt.close(); auto [r,c,m] = PromptCustomDifficulty(); chosen.emplace(Difficulty::CUSTOM,r,c,m); if(!chosen.value()) chosen=DifficultyConfig::From(Difficulty::BEGINNER); }
+                if (key == sf::Keyboard::Key::Num4)
+                {
+                    prompt.close();
+                    auto [r, c, m] = PromptCustomDifficulty();
+                    chosen.emplace(Difficulty::CUSTOM, r, c, m);
+                    if (!chosen.value()) chosen = DifficultyConfig::From(Difficulty::BEGINNER);
+                }
             }
         }
 

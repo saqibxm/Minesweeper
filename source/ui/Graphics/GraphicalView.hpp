@@ -13,6 +13,7 @@
 #include "Smiley.hpp"
 #include "Counter.hpp"
 #include "Graphics/DifficultySelectorDelegate.hpp"
+#include "Replay.hpp"
 
 namespace mines
 {
@@ -51,12 +52,15 @@ namespace mines
         sf::Font font;
         sf::Text message{font};
         sf::Text data{font};
-        sf::Text difficultyLabel{font};  // shows current difficulty in the header
+        sf::Text difficultyLabel{font};
+        sf::Text replayOverlay{font};
 
         unsigned mines = 0;
-        DifficultyConfig currentConfig;  // last applied config (for mid-game changes)
+        DifficultyConfig currentConfig;
 
-        impl::DifficultySelectorDelegate selector{font};  // reusable selector
+        impl::DifficultySelectorDelegate selector{font};
+
+        bool replayMode = false;
 
         void HandleClicked(const sf::Event::MouseButtonPressed&);
         void HandleClickReleased(const sf::Event::MouseButtonReleased&);
@@ -66,13 +70,12 @@ namespace mines
         Tile* TileAt(float x, float y);
         std::optional<UPair<Index>> CalculateCellCoord(float x, float y) const;
 
+        void PlayReplay(const Replay &replay);
+
 #ifndef NDEBUG
-        void RelayoutGrid(); // Reposition tiles/window after tile-size change in debug mode
-#endif
-    
-#ifndef NDEBUG
-    sf::Text debugInfo{font};
-    BoardSnapshot lastSnap;
+        void RelayoutGrid();
+        sf::Text debugInfo{font};
+        BoardSnapshot lastSnap;
 #endif /* NDEBUG */
     };
 }

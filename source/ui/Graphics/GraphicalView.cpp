@@ -269,9 +269,9 @@ void Graphics::ConfigUpdate(const DifficultyConfig &config)
             // Tiles are offset by the left border and the full header height
             vec.emplace_back(textures.PlaceholderPtr())
                 .UpdatePosition(
-                    static_cast<float>(BorderLeft  + TileWidth  * j),
-                    static_cast<float>(HeaderHeight + TileHeight * i))
-            .UpdateSize(TileWidth, TileHeight);
+                    static_cast<float>(BorderLeft  + CurrentTileWidth()  * j),
+                    static_cast<float>(HeaderHeight + CurrentTileHeight() * i))
+            .UpdateSize(CurrentTileWidth(), CurrentTileHeight());
         }
         tiles.push_back(std::move(vec));
     }
@@ -348,6 +348,24 @@ void Graphics::HandleKeyPressed(const sf::Event::KeyPressed &key)
 {
     using K = sf::Keyboard::Key;
 
+#ifndef NDEBUG
+    // Debug-only: + / - to increase / decrease tile size
+    if (key.code == K::Equal || key.code == K::Add)
+    {
+        LayoutConfig::SetDebugTileSize(CurrentTileWidth() + 4, CurrentTileHeight() + 4);
+        RelayoutGrid();
+        return;
+    }
+    if (key.code == K::Hyphen || key.code == K::Subtract)
+    {
+        unsigned nw = CurrentTileWidth()  > 8 ? CurrentTileWidth()  - 4 : 8;
+        unsigned nh = CurrentTileHeight() > 8 ? CurrentTileHeight() - 4 : 8;
+        LayoutConfig::SetDebugTileSize(nw, nh);
+        RelayoutGrid();
+        return;
+    }
+#endif // NDEBUG
+
     // F2 or N: new game with same difficulty
     if (key.code == K::F2 || key.code == K::N)
     {
@@ -373,6 +391,26 @@ void Graphics::HandleKeyPressed(const sf::Event::KeyPressed &key)
         catch (...) {} // user closed the dialog without choosing
     }
 }
+
+#ifndef NDEBUG
+void Graphics::RelayoutGrid()
+{
+    // Resize the window to fit the new tile dimensions
+    auto newMode = LayoutConfig::ComputeVideoMode({currentConfig.rows, currentConfig.cols});
+    window.setSize(newMode.size);
+
+    // Reposition and resize all tiles
+    for (std::size_t i = 0; i < tiles.size(); ++i)
+        for (std::size_t j = 0; j < tiles[i].size(); ++j)
+            tiles[i][j]
+                .UpdatePosition(
+                    static_cast<float>(BorderLeft  + CurrentTileWidth()  * j),
+                    static_cast<float>(HeaderHeight + CurrentTileHeight() * i))
+                .UpdateSize(CurrentTileWidth(), CurrentTileHeight());
+
+    Reset(currentConfig);
+}
+#endif // NDEBUG
 
 void Graphics::HandleClickReleased(const sf::Event::MouseButtonReleased &mouse)
 {

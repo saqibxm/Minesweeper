@@ -45,8 +45,8 @@ void Border::draw(sf::RenderTarget &target, sf::RenderStates states) const
     const float mH  = static_cast<float>(BorderMiddle);
     const float bH  = static_cast<float>(BorderBottom);
     const float hCH = static_cast<float>(HeaderContentHeight);
-    const float gW  = static_cast<float>(gridCols * TileWidth);
-    const float gH  = static_cast<float>(gridRows * TileHeight);
+    const float gW  = static_cast<float>(gridCols * CurrentTileWidth());
+    const float gH  = static_cast<float>(gridRows * CurrentTileHeight());
 
     // Derived positions
     const float midY    = tH + hCH;           // y of middle divider

@@ -65,6 +65,10 @@ namespace mines
         void RefreshTexture(Index r, Index c, const Cell&);
         Tile* TileAt(float x, float y);
         std::optional<UPair<Index>> CalculateCellCoord(float x, float y) const;
+
+#ifndef NDEBUG
+        void RelayoutGrid(); // Reposition tiles/window after tile-size change in debug mode
+#endif
     
 #ifndef NDEBUG
     sf::Text debugInfo{font};

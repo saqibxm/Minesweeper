@@ -18,14 +18,29 @@ namespace mines
 
         constexpr inline unsigned CounterWidth = 26, CounterHeight = 50; // subject to change
 
-        constexpr inline unsigned HeaderHeight = 100;
+        // Border sprite dimensions (derived from asset sizes)
+        constexpr inline unsigned BorderLeft   = 30; // topleft/left/middleleft/bottomleft width
+        constexpr inline unsigned BorderRight  = 23; // topright/right/middleright/bottomright width
+        constexpr inline unsigned BorderTop    = 30; // top edge height
+        constexpr inline unsigned BorderMiddle = 38; // horizontal divider between header and grid
+        constexpr inline unsigned BorderBottom = 23; // bottom edge height
+
+        // Height of the content region between top border and middle divider
+        constexpr inline unsigned HeaderContentHeight = 68; // matches counterleft/right border sprite height
+
+        // Total header height = top border + header content + middle divider
+        constexpr inline unsigned HeaderHeight = BorderTop + HeaderContentHeight + BorderMiddle; // 136 px
+
         constexpr inline unsigned FooterHeight = debug ? 80 : 0;
 
         constexpr const char Title[] = "Minesweeper";
 
         inline sf::VideoMode ComputeVideoMode(UPair<Index> size)
         {
-            return sf::VideoMode(sf::Vector2u(size.second * TileWidth, (size.first * TileHeight) + HeaderHeight + FooterHeight));
+            return sf::VideoMode(sf::Vector2u(
+                BorderLeft + size.second * TileWidth + BorderRight,
+                HeaderHeight + size.first * TileHeight + BorderBottom + FooterHeight
+            ));
         }
     }
 }

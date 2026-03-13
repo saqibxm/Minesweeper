@@ -12,7 +12,7 @@ using namespace std::string_literals;
 using namespace LayoutConfig;
 
 Graphics::Graphics(Controller &ctrl)
-    : context(ctrl), smiley(textures), flagCounter(textures), timeCounter(textures)
+    : context(ctrl), border(textures), smiley(textures), flagCounter(textures), timeCounter(textures)
 {
     using namespace LayoutConfig;
 
@@ -48,8 +48,11 @@ void Graphics::Reset(const DifficultyConfig &cfg)
     auto [windowWidth, windowHeight] = window.getSize();
     auto [smileyWidth, smileyHeight] = smiley.RetrieveSize();
 
+    // Header content area centre Y (between top border and middle divider)
+    const float headerCenterY = static_cast<float>(BorderTop) + static_cast<float>(HeaderContentHeight) / 2.f;
+
 #ifndef NDEBUG
-    debugInfo.setPosition(sf::Vector2f(10.f, TileHeight * rows + HeaderHeight));
+    debugInfo.setPosition(sf::Vector2f(static_cast<float>(BorderLeft), static_cast<float>(TileHeight * rows + HeaderHeight)));
     data.setPosition(sf::Vector2f(15.0f + (windowWidth / 2.F), 5.0f + (TileHeight * rows + HeaderHeight)));
 #else
     data.setPosition(sf::Vector2f(10.0f, 30.0F));
@@ -58,11 +61,21 @@ void Graphics::Reset(const DifficultyConfig &cfg)
     message.setString("Minesweeper");
     data.setString("Data");
 
-    smiley.UpdatePosition((windowWidth / 2) - smileyWidth, (HeaderHeight / 2) - smileyHeight);
-    timeCounter.UpdatePosition(windowWidth / 1.5f, (HeaderHeight / 2) - flagCounter.RetrieveSize().y / 2);
-    flagCounter.UpdatePosition((windowWidth / 3.0f) - timeCounter.RetrieveSize().x, (HeaderHeight / 2) - flagCounter.RetrieveSize().y / 2);
+    // Centre the smiley horizontally; vertically centre it in the header content band
+    smiley.UpdatePosition(
+        (windowWidth / 2.f) - smileyWidth / 2.f,
+        headerCenterY - smileyHeight / 2.f
+    );
 
-    message.setPosition(sf::Vector2f(10.0f, 10.0f));
+    // Flag counter: left side of header content, small margin from left border
+    const float counterY = headerCenterY - flagCounter.RetrieveSize().y / 2.f;
+    flagCounter.UpdatePosition(static_cast<float>(BorderLeft) + 6.f, counterY);
+
+    // Time counter: symmetric on the right side
+    const float contentRight = static_cast<float>(windowWidth - BorderRight);
+    timeCounter.UpdatePosition(contentRight - timeCounter.RetrieveSize().x - 6.f, counterY);
+
+    message.setPosition(sf::Vector2f(static_cast<float>(BorderLeft), static_cast<float>(BorderTop) + 4.f));
 
     mines = cfg.mines;
     flagCounter.SetNumber(mines);
@@ -98,6 +111,9 @@ void Graphics::Display()
     if(ShouldClose()) return;
     window.clear();
 
+    // Draw border chrome first (behind everything)
+    window.draw(border);
+
     for(auto i = 0U; i < tiles.size(); ++i)
     {
         for(auto j = 0U; j < tiles[i].size(); ++j)
@@ -115,8 +131,6 @@ void Graphics::Display()
 
 #ifndef NDEBUG
     auto [x, y] = sf::Mouse::getPosition(window);
-
-    auto [w, h] = std::make_pair(LayoutConfig::TileWidth, LayoutConfig::TileHeight);
 
     // info_debug.setPosition({x+20.0f, y+20.0f});
     debugInfo.setString("row: " + std::to_string(y/LayoutConfig::TileWidth) + '\n' + "col: " + std::to_string(x/LayoutConfig::TileHeight));
@@ -221,6 +235,8 @@ void Graphics::ConfigUpdate(const DifficultyConfig &config)
 {
     window.create(LayoutConfig::ComputeVideoMode({config.rows, config.cols}), LayoutConfig::Title, sf::Style::Close);
 
+    border.Configure(config.rows, config.cols);
+
     const auto &cfg = config;
     tiles.clear();
     tiles.reserve(cfg.rows);
@@ -232,10 +248,12 @@ void Graphics::ConfigUpdate(const DifficultyConfig &config)
     {
         for(decltype(cfg.cols) j = 0; j < cfg.cols; ++j)
         {
+            // Tiles are offset by the left border and the full header height
             vec.emplace_back(textures.PlaceholderPtr())
-                .UpdatePosition(LayoutConfig::TileWidth * j, (LayoutConfig::TileHeight * i) + LayoutConfig::HeaderHeight)
+                .UpdatePosition(
+                    static_cast<float>(BorderLeft  + TileWidth  * j),
+                    static_cast<float>(HeaderHeight + TileHeight * i))
             .UpdateSize(TileWidth, TileHeight);
-            // RefreshTexture(i, j); // segfault, for obvious reasons
         }
         tiles.push_back(std::move(vec));
     }

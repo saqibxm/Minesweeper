@@ -6,6 +6,7 @@
 #include <SFML/Graphics.hpp>
 
 #include "TextureManager.hpp"
+#include "Border.hpp"
 #include "View.hpp"
 #include "Game.hpp"
 #include "Tile.hpp"
@@ -42,6 +43,7 @@ namespace mines
         Controller &context;
         TextureManager textures;
 
+        Border border;
         Smiley smiley; // The smiley face
         Counter flagCounter;
         Counter timeCounter;

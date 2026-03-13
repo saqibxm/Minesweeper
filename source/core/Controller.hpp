@@ -4,10 +4,11 @@
 #include <stack>
 
 #include "common.h"
-#include "Game.hpp" // convert to an interface?
+#include "Game.hpp"
 #include "View.hpp"
 #include "Command.hpp"
 #include "stopwatch.h"
+#include "Replay.hpp"
 
 namespace mines
 {
@@ -25,21 +26,26 @@ public:
     void NewGameRequested();
     void NewGameRequested(const DifficultyConfig &);
     void ShutdownRequested();
-    // Cell& FetchCell(Index, Index);
+
     UPair<unsigned> ModelSize() const { return model.Dimensions(); }
+
+    // Replay access — returns the recording for the last completed game.
+    const Replay& LastReplay() const noexcept { return lastReplay; }
 
 private:
     Game &model;
     Stopwatch timer;
-
-    // bool running; // when the main view requests shut down set to false
 
     std::stack <
         std::unique_ptr<ICommand>,
         std::vector<std::unique_ptr<ICommand>>
     > commands;
 
+    Replay currentRecording; // records the game in progress
+    Replay lastReplay;       // saved when a new game starts
+
     bool HandleCommand(std::unique_ptr<ICommand>);
+    void SaveAndResetRecording();
 };
 
 }

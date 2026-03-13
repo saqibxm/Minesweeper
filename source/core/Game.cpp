@@ -52,7 +52,10 @@ void Game::Reveal(Index r, Index c)
 {
     // TODO: implement state pattern
     if (state == EState::READY)
+    {
+        EnsureSafeFirstClick(r, c); // Guarantee the first click is never a mine
         TransitionTo<PlayingState>();
+    }
 
     gameState->Reveal(r, c);
 

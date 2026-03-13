@@ -97,6 +97,7 @@ set(
 
         source/ui/Graphics/GraphicalView.hpp
         source/ui/Graphics/LayoutConfig.hpp
+        source/ui/Graphics/Border.hpp
         source/ui/PlaceholderTexture.h
         source/ui/Graphics/Tile.hpp
         source/ui/Graphics/TextureManager.hpp
@@ -106,6 +107,7 @@ set(
 
         source/base/Command.cpp
         source/base/State.cpp
+        source/base/Replay.cpp
         source/base/NumberGenerator.cpp
 
         source/core/Cell.cpp
@@ -114,6 +116,7 @@ set(
         source/core/Controller.cpp
     
         source/ui/Graphics/GraphicalView.cpp
+        source/ui/Graphics/Border.cpp
         source/ui/Graphics/TextureManager.cpp
         source/ui/Graphics/Tile.cpp
         source/ui/Graphics/Smiley.cpp

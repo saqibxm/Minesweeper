@@ -6,11 +6,14 @@
 #include <SFML/Graphics.hpp>
 
 #include "TextureManager.hpp"
+#include "Border.hpp"
 #include "View.hpp"
 #include "Game.hpp"
 #include "Tile.hpp"
 #include "Smiley.hpp"
 #include "Counter.hpp"
+#include "Graphics/DifficultySelectorDelegate.hpp"
+#include "Replay.hpp"
 
 namespace mines
 {
@@ -19,13 +22,12 @@ namespace mines
     public:
         Graphics() = default;
         Graphics(Controller &ctrl);
-        // ~Graphics();
 
         void Reset(const DifficultyConfig&);
         DifficultyConfig SelectDifficulty() override;
         void ShowMessage(const std::string &msg) override;
         void Display() override;
-        bool ShouldClose() const override; // if the view should close
+        bool ShouldClose() const override;
 
         void Update(const BoardSnapshot &snap) override;
         void CellUpdate(Index r, Index c, const Cell&) override;
@@ -42,26 +44,38 @@ namespace mines
         Controller &context;
         TextureManager textures;
 
-        Smiley smiley; // The smiley face
+        Border border;
+        Smiley smiley;
         Counter flagCounter;
         Counter timeCounter;
 
         sf::Font font;
         sf::Text message{font};
         sf::Text data{font};
+        sf::Text difficultyLabel{font};
+        sf::Text replayOverlay{font};
 
         unsigned mines = 0;
+        DifficultyConfig currentConfig;
+
+        impl::DifficultySelectorDelegate selector{font};
+
+        bool replayMode = false;
 
         void HandleClicked(const sf::Event::MouseButtonPressed&);
         void HandleClickReleased(const sf::Event::MouseButtonReleased&);
+        void HandleKeyPressed(const sf::Event::KeyPressed&);
         void DrawCell(Index r, Index c);
         void RefreshTexture(Index r, Index c, const Cell&);
         Tile* TileAt(float x, float y);
         std::optional<UPair<Index>> CalculateCellCoord(float x, float y) const;
-    
+
+        void PlayReplay(const Replay &replay);
+
 #ifndef NDEBUG
-    sf::Text debugInfo{font};
-    BoardSnapshot lastSnap;
+        void RelayoutGrid();
+        sf::Text debugInfo{font};
+        BoardSnapshot lastSnap;
 #endif /* NDEBUG */
     };
 }

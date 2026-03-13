@@ -30,6 +30,9 @@ Graphics::Graphics(Controller &ctrl)
     data.setFillColor(sf::Color::White);
     data.setCharacterSize(12);
 
+    difficultyLabel.setFillColor(sf::Color{200, 200, 200});
+    difficultyLabel.setCharacterSize(11);
+
     flagCounter.UpdateSize(CounterWidth, CounterHeight);
     timeCounter.UpdateSize(CounterWidth, CounterHeight);
 
@@ -77,13 +80,22 @@ void Graphics::Reset(const DifficultyConfig &cfg)
 
     message.setPosition(sf::Vector2f(static_cast<float>(BorderLeft), static_cast<float>(BorderTop) + 4.f));
 
+    // Difficulty label — centred below the smiley
+    difficultyLabel.setString(DifficultyConfig::DiffToString(cfg.level).data());
+    {
+        auto lb = difficultyLabel.getLocalBounds();
+        difficultyLabel.setPosition(sf::Vector2f{
+            (windowWidth / 2.f) - lb.size.x / 2.f,
+            headerCenterY + static_cast<float>(smileyHeight) / 2.f + 2.f
+        });
+    }
+
     mines = cfg.mines;
     flagCounter.SetNumber(mines);
 }
 
 DifficultyConfig Graphics::SelectDifficulty()
 {
-    static impl::DifficultySelectorDelegate selector(font);
     return selector.PromptSelection();
 }
 
@@ -126,6 +138,7 @@ void Graphics::Display()
     window.draw(timeCounter);
     window.draw(flagCounter);
     window.draw(message);
+    window.draw(difficultyLabel);
     window.draw(data);
     window.draw(smiley);
 
@@ -176,6 +189,10 @@ void Graphics::Display()
         else if constexpr (std::is_same_v<Type, sf::Event::MouseButtonPressed>)
         {
             HandleClicked(event);
+        }
+        else if constexpr (std::is_same_v<Type, sf::Event::KeyPressed>)
+        {
+            HandleKeyPressed(event);
         }
     });
     
@@ -233,6 +250,7 @@ void Graphics::TimeReceived(double seconds)
 
 void Graphics::ConfigUpdate(const DifficultyConfig &config)
 {
+    currentConfig = config;
     window.create(LayoutConfig::ComputeVideoMode({config.rows, config.cols}), LayoutConfig::Title, sf::Style::Close);
 
     border.Configure(config.rows, config.cols);
@@ -324,6 +342,36 @@ void Graphics::RefreshTexture(Index row, Index col, const Cell& cell)
 #endif // NDEBUG
 
     tile.UpdateTexture(textures.FetchPtr(texture));
+}
+
+void Graphics::HandleKeyPressed(const sf::Event::KeyPressed &key)
+{
+    using K = sf::Keyboard::Key;
+
+    // F2 or N: new game with same difficulty
+    if (key.code == K::F2 || key.code == K::N)
+    {
+        context.NewGameRequested();
+        smiley.Revive();
+        return;
+    }
+
+    // 1 / 2 / 3: quick-switch to a preset difficulty (starts a new game)
+    if (key.code == K::Num1) { context.NewGameRequested(DifficultyConfig::From(Difficulty::BEGINNER));     smiley.Revive(); return; }
+    if (key.code == K::Num2) { context.NewGameRequested(DifficultyConfig::From(Difficulty::INTERMEDIATE)); smiley.Revive(); return; }
+    if (key.code == K::Num3) { context.NewGameRequested(DifficultyConfig::From(Difficulty::EXPERT));       smiley.Revive(); return; }
+
+    // 4 or D: open the full difficulty selector mid-game
+    if (key.code == K::Num4 || key.code == K::D)
+    {
+        try
+        {
+            auto cfg = selector.PromptSelection();
+            context.NewGameRequested(cfg);
+            smiley.Revive();
+        }
+        catch (...) {} // user closed the dialog without choosing
+    }
 }
 
 void Graphics::HandleClickReleased(const sf::Event::MouseButtonReleased &mouse)

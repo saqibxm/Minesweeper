@@ -12,6 +12,7 @@
 #include "Tile.hpp"
 #include "Smiley.hpp"
 #include "Counter.hpp"
+#include "Graphics/DifficultySelectorDelegate.hpp"
 
 namespace mines
 {
@@ -20,13 +21,12 @@ namespace mines
     public:
         Graphics() = default;
         Graphics(Controller &ctrl);
-        // ~Graphics();
 
         void Reset(const DifficultyConfig&);
         DifficultyConfig SelectDifficulty() override;
         void ShowMessage(const std::string &msg) override;
         void Display() override;
-        bool ShouldClose() const override; // if the view should close
+        bool ShouldClose() const override;
 
         void Update(const BoardSnapshot &snap) override;
         void CellUpdate(Index r, Index c, const Cell&) override;
@@ -44,18 +44,23 @@ namespace mines
         TextureManager textures;
 
         Border border;
-        Smiley smiley; // The smiley face
+        Smiley smiley;
         Counter flagCounter;
         Counter timeCounter;
 
         sf::Font font;
         sf::Text message{font};
         sf::Text data{font};
+        sf::Text difficultyLabel{font};  // shows current difficulty in the header
 
         unsigned mines = 0;
+        DifficultyConfig currentConfig;  // last applied config (for mid-game changes)
+
+        impl::DifficultySelectorDelegate selector{font};  // reusable selector
 
         void HandleClicked(const sf::Event::MouseButtonPressed&);
         void HandleClickReleased(const sf::Event::MouseButtonReleased&);
+        void HandleKeyPressed(const sf::Event::KeyPressed&);
         void DrawCell(Index r, Index c);
         void RefreshTexture(Index r, Index c, const Cell&);
         Tile* TileAt(float x, float y);

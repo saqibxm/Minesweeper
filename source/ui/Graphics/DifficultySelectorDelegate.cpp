@@ -8,6 +8,24 @@
 using namespace mines;
 using namespace mines::impl;
 
+// ─── Colour palette ──────────────────────────────────────────────────────────
+static constexpr sf::Color BG      {45,  45,  45};   // window background
+static constexpr sf::Color BTN_IDLE{68,  68,  68};   // button normal
+static constexpr sf::Color BTN_HOV {100, 100, 100};  // button hovered
+static constexpr sf::Color BTN_CUST{50,  80,  110};  // custom button idle
+static constexpr sf::Color BTN_CHOV{70,  110, 150};  // custom button hovered
+static constexpr sf::Color TXT_MAIN{240, 240, 240};  // main text
+static constexpr sf::Color TXT_SUB {170, 170, 170};  // subtitle / hint text
+
+// Helper — build a subtitle string with grid info for a difficulty.
+static std::string DiffSubtitle(Difficulty diff)
+{
+    auto cfg = DifficultyConfig::From(diff);
+    if (diff == Difficulty::CUSTOM) return "Enter your own settings";
+    return std::to_string(cfg.rows) + " \xc3\x97 " + std::to_string(cfg.cols)   // ×
+           + "  \xe2\x80\xa2  " + std::to_string(cfg.mines) + " mines";          // •
+}
+
 DifficultySelectorDelegate::DifficultySelectorDelegate(sf::Font &font_) : font(font_)
 {
 }
@@ -16,13 +34,13 @@ DifficultySelectorDelegate::DifficultySelectorDelegate(sf::Font &font_) : font(f
 DifficultyConfig DifficultySelectorDelegate::PromptSelection()
 {
     constexpr std::size_t sz = 4;
-    sf::RectangleShape buttons[sz];
-    std::vector<sf::Text> labels;
 
     if (prompt.isOpen()) prompt.close();
-    prompt.create(sf::VideoMode({240, 250}), "Select Difficulty", sf::Style::Close);
 
-    // Predefined difficulty levels for button mapping
+    constexpr unsigned W = 280, H = 320;
+    prompt.create(sf::VideoMode({W, H}), "Select Difficulty", sf::Style::Close);
+    prompt.setFramerateLimit(30);
+
     constexpr Difficulty levels[sz] = {
         Difficulty::BEGINNER,
         Difficulty::INTERMEDIATE,
@@ -30,28 +48,49 @@ DifficultyConfig DifficultySelectorDelegate::PromptSelection()
         Difficulty::CUSTOM
     };
 
-    // Layout and initialize buttons and labels
+    // ── Title ─────────────────────────────────────────────────────────────────
+    sf::Text title(font, "Minesweeper", 22);
+    title.setFillColor(TXT_MAIN);
+    title.setPosition({W / 2.f - title.getLocalBounds().size.x / 2.f, 10.f});
+
+    sf::Text hint(font, "1 Beginner  2 Intermediate  3 Expert", 9);
+    hint.setFillColor(TXT_SUB);
+    hint.setPosition({W / 2.f - hint.getLocalBounds().size.x / 2.f, 38.f});
+
+    // ── Buttons ───────────────────────────────────────────────────────────────
+    constexpr float BTN_X = 15.f, BTN_W = W - 30.f, BTN_H = 52.f, BTN_GAP = 8.f;
+    constexpr float FIRST_Y = 60.f;
+
+    sf::RectangleShape buttons[sz];
+    sf::Text mainLabels[sz] = {sf::Text{font}, sf::Text{font}, sf::Text{font}, sf::Text{font}};
+    sf::Text subLabels[sz]  = {sf::Text{font}, sf::Text{font}, sf::Text{font}, sf::Text{font}};
+
     for (std::size_t i = 0; i < sz; ++i)
     {
-        buttons[i].setSize({220, 50});
-        buttons[i].setPosition({10.0f, 60.0f * i + 10});
-        buttons[i].setFillColor(sf::Color::White);
+        float y = FIRST_Y + i * (BTN_H + BTN_GAP);
+        buttons[i].setSize({BTN_W, BTN_H});
+        buttons[i].setPosition({BTN_X, y});
+        buttons[i].setFillColor(i < sz - 1 ? BTN_IDLE : BTN_CUST);
 
-        sf::Text text(font, DifficultyConfig::DiffToString(levels[i]).data(), 22);
-        sf::FloatRect textRect = text.getLocalBounds();
-        text.setOrigin({textRect.size.y + textRect.size.x / 2.0f, textRect.position.y + textRect.size.y / 2.0f});
-        text.setPosition({buttons[i].getPosition().x + buttons[i].getSize().x / 2.0f,
-                         buttons[i].getPosition().y + buttons[i].getSize().y / 2.0f});
-        text.setFillColor(sf::Color::Black);
-        labels.push_back(std::move(text));
+        mainLabels[i].setFont(font);
+        mainLabels[i].setString(DifficultyConfig::DiffToString(levels[i]).data());
+        mainLabels[i].setCharacterSize(16);
+        mainLabels[i].setFillColor(TXT_MAIN);
+        mainLabels[i].setPosition({BTN_X + 10.f, y + 8.f});
+
+        subLabels[i].setFont(font);
+        subLabels[i].setString(DiffSubtitle(levels[i]));
+        subLabels[i].setCharacterSize(10);
+        subLabels[i].setFillColor(TXT_SUB);
+        subLabels[i].setPosition({BTN_X + 10.f, y + 30.f});
     }
 
     std::optional<DifficultyConfig> chosen;
 
-    // Main input loop
+    // ── Event loop ─────────────────────────────────────────────────────────────
     while (prompt.isOpen())
     {
-        prompt.clear(sf::Color::Black);
+        sf::Vector2f mousePos = sf::Vector2f(sf::Mouse::getPosition(prompt));
 
         while (const auto event = prompt.pollEvent())
         {
@@ -60,34 +99,59 @@ DifficultyConfig DifficultySelectorDelegate::PromptSelection()
                 prompt.close();
                 break;
             }
-            else if (const auto mbr = event->getIf<sf::Event::MouseButtonReleased>())
+
+            if (const auto *mbr = event->getIf<sf::Event::MouseButtonReleased>())
             {
-                const auto mousePos = sf::Vector2f(mbr->position);
+                const auto mpos = sf::Vector2f(mbr->position);
                 for (std::size_t i = 0; i < sz; ++i)
                 {
-                    if (buttons[i].getGlobalBounds().contains(mousePos))
+                    if (!buttons[i].getGlobalBounds().contains(mpos)) continue;
+                    if (i < sz - 1)
                     {
-                        if (i < sz - 1)
-                        {
-                            chosen = DifficultyConfig::From(levels[i]);
-                        }
-                        else
-                        {
-                            // Custom selection — prompt user
-                            prompt.close();
-                            auto [rows, cols, mines] = PromptCustomDifficulty();
-                            chosen.emplace(Difficulty::CUSTOM, rows, cols, mines);
-                            if (!chosen.value()) chosen = DifficultyConfig::From(levels[0]);
-                        }
+                        chosen = DifficultyConfig::From(levels[i]);
                         prompt.close();
-                        break;
                     }
+                    else
+                    {
+                        prompt.close();
+                        auto [rows, cols, mines_] = PromptCustomDifficulty();
+                        chosen.emplace(Difficulty::CUSTOM, rows, cols, mines_);
+                        if (!chosen.value()) chosen = DifficultyConfig::From(Difficulty::BEGINNER);
+                    }
+                    break;
                 }
+            }
+
+            // Keyboard shortcuts 1–3
+            if (const auto *kp = event->getIf<sf::Event::KeyPressed>())
+            {
+                auto key = kp->code;
+                if (key == sf::Keyboard::Key::Num1) { chosen = DifficultyConfig::From(Difficulty::BEGINNER);     prompt.close(); }
+                if (key == sf::Keyboard::Key::Num2) { chosen = DifficultyConfig::From(Difficulty::INTERMEDIATE); prompt.close(); }
+                if (key == sf::Keyboard::Key::Num3) { chosen = DifficultyConfig::From(Difficulty::EXPERT);       prompt.close(); }
+                if (key == sf::Keyboard::Key::Num4) { prompt.close(); auto [r,c,m] = PromptCustomDifficulty(); chosen.emplace(Difficulty::CUSTOM,r,c,m); if(!chosen.value()) chosen=DifficultyConfig::From(Difficulty::BEGINNER); }
             }
         }
 
-        for (auto &btn : buttons) prompt.draw(btn);
-        for (auto &label : labels) prompt.draw(label);
+        // Hover colours
+        for (std::size_t i = 0; i < sz; ++i)
+        {
+            bool hov = buttons[i].getGlobalBounds().contains(mousePos);
+            if (i < sz - 1)
+                buttons[i].setFillColor(hov ? BTN_HOV : BTN_IDLE);
+            else
+                buttons[i].setFillColor(hov ? BTN_CHOV : BTN_CUST);
+        }
+
+        prompt.clear(BG);
+        prompt.draw(title);
+        prompt.draw(hint);
+        for (std::size_t i = 0; i < sz; ++i)
+        {
+            prompt.draw(buttons[i]);
+            prompt.draw(mainLabels[i]);
+            prompt.draw(subLabels[i]);
+        }
         prompt.display();
     }
 
@@ -103,10 +167,15 @@ std::array<unsigned, 3> DifficultySelectorDelegate::PromptCustomDifficulty()
     constexpr unsigned nfields = 3;
     sf::RenderWindow &inputWindow = prompt;
     prompt.create(sf::VideoMode({300, 300}), "Custom Difficulty", sf::Style::Close);
+    prompt.setFramerateLimit(30);
 
-    sf::Text title(font, "Press Enter to Advance", 16);
+    sf::Text title(font, "Custom Game", 18);
+    title.setFillColor(TXT_MAIN);
     title.setPosition({10.f, 10.f});
-    title.setFillColor(sf::Color::White);
+
+    sf::Text subtitle(font, "Tab / Enter to advance fields", 10);
+    subtitle.setFillColor(TXT_SUB);
+    subtitle.setPosition({10.f, 36.f});
 
     std::array<std::string, nfields> labels = {"Rows:", "Cols:", "Mines:"};
     std::array<std::string, nfields> inputs = {};
@@ -116,29 +185,33 @@ std::array<unsigned, 3> DifficultySelectorDelegate::PromptCustomDifficulty()
     for (int i = 0; i < nfields; ++i)
     {
         inputTexts.emplace_back(font);
-        inputBoxes[i].setOutlineColor(sf::Color::Cyan);
-        inputTexts[i].setCharacterSize(18);
-        inputTexts[i].setFillColor(sf::Color::Black);
-        inputTexts[i].setPosition({110.f, 50.f + i * 60});
+        inputTexts[i].setCharacterSize(16);
+        inputTexts[i].setFillColor(sf::Color::White);
+        inputTexts[i].setPosition({110.f, 60.f + i * 60.f + 6.f});
 
-        inputBoxes[i].setSize({150.f, 30.f});
-        inputBoxes[i].setPosition({100.f, 50.f + i * 60});
-        inputBoxes[i].setFillColor(sf::Color::White);
+        inputBoxes[i].setSize({150.f, 32.f});
+        inputBoxes[i].setPosition({100.f, 60.f + i * 60.f});
+        inputBoxes[i].setFillColor(BTN_IDLE);
+        inputBoxes[i].setOutlineThickness(2.f);
+        inputBoxes[i].setOutlineColor(sf::Color::Transparent);
     }
 
     int currentBox = 0;
-    sf::Text labelText(font,"" , 18);
-    labelText.setFillColor(sf::Color::White);
+    sf::Text labelText(font, "", 16);
+    labelText.setFillColor(TXT_SUB);
 
-    sf::RectangleShape okButton({80.f, 40.f});
-    okButton.setPosition({110.f, 240.f});
-    okButton.setFillColor(sf::Color::Green);
-    sf::Text okText(font ,"OK" , 18);
-    okText.setPosition({135.f, 250.f});
-    okText.setFillColor(sf::Color::Black);
+    sf::RectangleShape okButton({100.f, 38.f});
+    okButton.setPosition({100.f, 248.f});
+    okButton.setFillColor(BTN_CUST);
+    sf::Text okText(font, "OK", 16);
+    okText.setFillColor(TXT_MAIN);
+    okText.setPosition({148.f - okText.getLocalBounds().size.x / 2.f, 255.f});
 
     while (inputWindow.isOpen())
     {
+        sf::Vector2f mpos = sf::Vector2f(sf::Mouse::getPosition(inputWindow));
+        okButton.setFillColor(okButton.getGlobalBounds().contains(mpos) ? BTN_CHOV : BTN_CUST);
+
         while (const auto event = inputWindow.pollEvent())
         {
             if (event->is<sf::Event::Closed>())
@@ -150,20 +223,16 @@ std::array<unsigned, 3> DifficultySelectorDelegate::PromptCustomDifficulty()
                     inputs[currentBox] += static_cast<char>(e.unicode);
                 else if (e.unicode == '\b' && !inputs[currentBox].empty())
                     inputs[currentBox].pop_back();
-
                 inputTexts[currentBox].setString(inputs[currentBox]);
             }
             else if (const auto *kp = event->getIf<sf::Event::KeyPressed>())
             {
-                const auto &e = *kp;
-                if (e.code == sf::Keyboard::Key::Enter)
+                if (kp->code == sf::Keyboard::Key::Enter)
                 {
-                    if (currentBox < 2)
-                        ++currentBox;
-                    else
-                        inputWindow.close();
+                    if (currentBox < 2) ++currentBox;
+                    else                inputWindow.close();
                 }
-                else if (e.code == sf::Keyboard::Key::Tab)
+                else if (kp->code == sf::Keyboard::Key::Tab)
                 {
                     currentBox = (currentBox + 1) % nfields;
                 }
@@ -171,31 +240,23 @@ std::array<unsigned, 3> DifficultySelectorDelegate::PromptCustomDifficulty()
             else if (const auto *mbr = event->getIf<sf::Event::MouseButtonReleased>())
             {
                 for (int i = 0; i < nfields; ++i)
-                {
-                    if (inputBoxes[i].getGlobalBounds().contains(static_cast<sf::Vector2f>(mbr->position)))
-                        currentBox = i;
-                }
-                if (okButton.getGlobalBounds().contains(static_cast<sf::Vector2f>(mbr->position)))
-                {
-                    /*
-                    for (int i = 0; i < nfields; ++i)
-                    {
-                        if (inputs[i].empty()) inputs[i] = "0";
-                    } */
+                    if (inputBoxes[i].getGlobalBounds().contains(sf::Vector2f(mbr->position))) currentBox = i;
+                if (okButton.getGlobalBounds().contains(sf::Vector2f(mbr->position)))
                     inputWindow.close();
-                }
-
             }
-            for (int i = 0; i < nfields; ++i) inputBoxes[i].setOutlineThickness(0.0f);
-            inputBoxes[currentBox].setOutlineThickness(4.0f);
+
+            for (int i = 0; i < nfields; ++i)
+                inputBoxes[i].setOutlineColor(sf::Color::Transparent);
+            inputBoxes[currentBox].setOutlineColor(sf::Color{100, 160, 220});
         }
 
-        inputWindow.clear(sf::Color::Black);
+        inputWindow.clear(BG);
         inputWindow.draw(title);
-        for (int i = 0; i < 3; ++i)
+        inputWindow.draw(subtitle);
+        for (int i = 0; i < nfields; ++i)
         {
             labelText.setString(labels[i]);
-            labelText.setPosition({20.f, 50.f + i * 60});
+            labelText.setPosition({10.f, 60.f + i * 60.f + 6.f});
             inputWindow.draw(labelText);
             inputWindow.draw(inputBoxes[i]);
             inputWindow.draw(inputTexts[i]);
@@ -208,14 +269,8 @@ std::array<unsigned, 3> DifficultySelectorDelegate::PromptCustomDifficulty()
     std::array<unsigned, 3> ret;
     for (std::size_t i = 0; i < std::size(ret); ++i)
     {
-        try
-        {
-            ret[i] = std::stoi(inputs[i]);
-        }
-        catch (const std::invalid_argument &e)
-        {
-            ret[i] = 0;
-        }
+        try   { ret[i] = std::stoi(inputs[i]); }
+        catch (...) { ret[i] = 0; }
     }
     return ret;
 }
